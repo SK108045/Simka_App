@@ -28,7 +28,7 @@ class NotificationService {
     }
 
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/launcher_icon');
 
     const initSettings = InitializationSettings(
       android: androidSettings,
@@ -59,7 +59,7 @@ class NotificationService {
         channelDescription: 'Reminders for fire service appointments',
         importance: Importance.max,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
+        icon: '@mipmap/launcher_icon',
         color: Color(0xFFE53935),
         enableLights: true,
         ledColor: Color(0xFFE53935),
