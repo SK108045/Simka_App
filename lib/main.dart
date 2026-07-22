@@ -19,6 +19,9 @@ import 'screens/calendar_screen.dart';
 import 'screens/invoices_screen.dart';
 import 'screens/quotations_screen.dart';
 import 'screens/reports_screen.dart';
+import 'screens/add_client_screen.dart';
+import 'screens/create_invoice_screen.dart';
+import 'screens/create_quotation_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -227,158 +230,212 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  bool _isNavOpen = false;
-
-  final List<_NavItem> _navItems = const [
-    _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard', activeIcon: Icons.dashboard_rounded),
-    _NavItem(icon: Icons.calendar_month_outlined, label: 'Calendar', activeIcon: Icons.calendar_month_rounded),
-    _NavItem(icon: Icons.receipt_long_outlined, label: 'Invoices', activeIcon: Icons.receipt_long_rounded),
-    _NavItem(icon: Icons.request_quote_outlined, label: 'Quotations', activeIcon: Icons.request_quote_rounded),
-    _NavItem(icon: Icons.bar_chart_outlined, label: 'Reports', activeIcon: Icons.bar_chart_rounded),
-  ];
-
   final List<Widget> _screens = const [
     HomeScreen(),
     CalendarScreen(),
     InvoicesScreen(),
-    QuotationsScreen(),
     ReportsScreen(),
   ];
+
+  void _showQuickActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: AppTheme.surfaceDark,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border(
+            top: BorderSide(color: AppTheme.borderColor, width: 1),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.fireRed.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.local_fire_department_rounded, color: AppTheme.fireRed, size: 24),
+                ),
+                const SizedBox(width: 12),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quick Actions',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Create new entries instantly',
+                      style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _QuickActionTile(
+              icon: Icons.person_add_rounded,
+              color: AppTheme.fireRed,
+              title: 'Add New Client',
+              subtitle: 'Register client & fire equipment details',
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddClientScreen()));
+              },
+            ),
+            const SizedBox(height: 12),
+            _QuickActionTile(
+              icon: Icons.receipt_long_rounded,
+              color: AppTheme.emberOrange,
+              title: 'Create Invoice',
+              subtitle: 'Issue a new service or equipment invoice',
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()));
+              },
+            ),
+            const SizedBox(height: 12),
+            _QuickActionTile(
+              icon: Icons.request_quote_rounded,
+              color: AppTheme.warningAmber,
+              title: 'Create Quotation',
+              subtitle: 'Generate a quote for fire services',
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateQuotationScreen()));
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.darkBg,
-      body: Stack(
-        children: [
-          Row(
-            children: [
-              // Spacer that pushes content when nav is open
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                width: _isNavOpen ? 72 : 0,
-              ),
-              // Main Content
-              Expanded(
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: _screens,
-                ),
-              ),
-            ],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: Container(
+        height: 72,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceDark.withValues(alpha: 0.95),
+          border: const Border(
+            top: BorderSide(color: AppTheme.borderColor, width: 1),
           ),
-          // Sidebar
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            left: _isNavOpen ? 0 : -72,
-            top: 0,
-            bottom: 0,
-            child: Container(
-              width: 72,
-              decoration: const BoxDecoration(
-                color: AppTheme.surfaceDark,
-                border: Border(
-                  right: BorderSide(color: AppTheme.borderColor, width: 1),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40), // Top padding for mobile
-                  // Logo
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.fireRed, AppTheme.emberOrange],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.local_fire_department_rounded,
-                        color: Colors.white, size: 26),
-                  ),
-                  const SizedBox(height: 32),
-                  // Nav Items
-                  ...List.generate(_navItems.length, (index) {
-                    final item = _navItems[index];
-                    final isActive = _currentIndex == index;
-                    return _SideNavButton(
-                      icon: isActive ? item.activeIcon : item.icon,
-                      label: item.label,
-                      isActive: isActive,
-                      onTap: () {
-                        setState(() {
-                          _currentIndex = index;
-                          _isNavOpen = false; // Auto close on selection
-                        });
-                      },
-                    );
-                  }),
-                ],
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
             ),
-          ),
-          // Toggle Handle
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            left: _isNavOpen ? 72 : 0,
-            top: MediaQuery.of(context).size.height / 2 - 30,
-            child: GestureDetector(
-              onTap: () => setState(() => _isNavOpen = !_isNavOpen),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            // Dashboard Tab
+            _BottomNavItem(
+              icon: Icons.dashboard_outlined,
+              activeIcon: Icons.dashboard_rounded,
+              label: 'Dashboard',
+              isActive: _currentIndex == 0,
+              onTap: () => setState(() => _currentIndex = 0),
+            ),
+            // Calendar Tab
+            _BottomNavItem(
+              icon: Icons.calendar_month_outlined,
+              activeIcon: Icons.calendar_month_rounded,
+              label: 'Calendar',
+              isActive: _currentIndex == 1,
+              onTap: () => setState(() => _currentIndex = 1),
+            ),
+            // Centered Fire Action Button
+            GestureDetector(
+              onTap: () => _showQuickActionSheet(context),
               child: Container(
-                width: 24,
-                height: 60,
+                width: 52,
+                height: 52,
+                margin: const EdgeInsets.only(bottom: 6),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceDark,
-                  border: Border.all(color: AppTheme.borderColor),
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.fireRed, AppTheme.emberOrange],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                      offset: const Offset(2, 0),
+                      color: AppTheme.fireRed.withValues(alpha: 0.5),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 4),
                     )
                   ],
                 ),
-                child: Center(
-                  child: Icon(
-                    _isNavOpen ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
-                    color: AppTheme.fireRed,
-                    size: 20,
-                  ),
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  color: Colors.white,
+                  size: 30,
                 ),
               ),
             ),
-          ),
-        ],
+            // Invoices Tab
+            _BottomNavItem(
+              icon: Icons.receipt_long_outlined,
+              activeIcon: Icons.receipt_long_rounded,
+              label: 'Invoices',
+              isActive: _currentIndex == 2,
+              onTap: () => setState(() => _currentIndex = 2),
+            ),
+            // Reports Tab
+            _BottomNavItem(
+              icon: Icons.bar_chart_outlined,
+              activeIcon: Icons.bar_chart_rounded,
+              label: 'Reports',
+              isActive: _currentIndex == 3,
+              onTap: () => setState(() => _currentIndex = 3),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _NavItem {
+class _BottomNavItem extends StatelessWidget {
   final IconData icon;
   final IconData activeIcon;
-  final String label;
-  const _NavItem({required this.icon, required this.activeIcon, required this.label});
-}
-
-class _SideNavButton extends StatelessWidget {
-  final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _SideNavButton({
+  const _BottomNavItem({
     required this.icon,
+    required this.activeIcon,
     required this.label,
     required this.isActive,
     required this.onTap,
@@ -386,32 +443,93 @@ class _SideNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Tooltip(
-        message: label,
-        preferBelow: false,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppTheme.fireRed.withValues(alpha: 0.15)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              border: isActive
-                  ? Border.all(color: AppTheme.fireRed.withValues(alpha: 0.4), width: 1)
-                  : null,
-            ),
-            child: Icon(
-              icon,
-              size: 22,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isActive ? activeIcon : icon,
               color: isActive ? AppTheme.fireRed : AppTheme.textMuted,
+              size: 24,
             ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isActive ? Colors.white : AppTheme.textMuted,
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickActionTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _QuickActionTile({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppTheme.cardDark,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.borderColor),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppTheme.textMuted),
+            ],
           ),
         ),
       ),

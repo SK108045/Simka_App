@@ -5,20 +5,29 @@ import '../models/invoice.dart';
 import '../services/invoice_service.dart';
 import '../theme/app_theme.dart';
 import 'create_invoice_screen.dart';
+import 'quotations_screen.dart';
 import '../widgets/background_glow.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/fade_in.dart';
 
 class InvoicesScreen extends StatefulWidget {
-  const InvoicesScreen({super.key});
+  final int initialSubTab;
+  const InvoicesScreen({super.key, this.initialSubTab = 0});
 
   @override
   State<InvoicesScreen> createState() => _InvoicesScreenState();
 }
 
 class _InvoicesScreenState extends State<InvoicesScreen> {
+  late int _activeSubTab;
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Paid', 'Unpaid', 'Overdue'];
+
+  @override
+  void initState() {
+    super.initState();
+    _activeSubTab = widget.initialSubTab;
+  }
 
   List<Invoice> _applyFilter(List<Invoice> invoices) {
     switch (_selectedFilter) {
@@ -65,11 +74,26 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_activeSubTab == 1) {
+      return Scaffold(
+        backgroundColor: AppTheme.darkBg,
+        body: Column(
+          children: [
+            const SizedBox(height: 48),
+            _buildTabSegmentToggle(),
+            const Expanded(child: QuotationsScreen()),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.darkBg,
       appBar: AppBar(
         backgroundColor: AppTheme.darkBg,
-        title: const Text('Invoices'),
+        elevation: 0,
+        title: _buildTabSegmentToggle(),
+        centerTitle: true,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: _buildFilterRow(),
@@ -112,6 +136,63 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             );
           },
         ),
+      ),
+    );
+  Widget _buildTabSegmentToggle() {
+    return Container(
+      width: 240,
+      height: 38,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: AppTheme.cardDark,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.borderColor, width: 1),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _activeSubTab = 0),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: _activeSubTab == 0 ? AppTheme.fireRed : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Invoices',
+                  style: TextStyle(
+                    color: _activeSubTab == 0 ? Colors.white : AppTheme.textMuted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _activeSubTab = 1),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: _activeSubTab == 1 ? AppTheme.fireRed : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Quotations',
+                  style: TextStyle(
+                    color: _activeSubTab == 1 ? Colors.white : AppTheme.textMuted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
