@@ -138,6 +138,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         ),
       ),
     );
+  }
+
   Widget _buildTabSegmentToggle() {
     return Container(
       width: 240,

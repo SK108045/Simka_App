@@ -17,7 +17,6 @@ import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/invoices_screen.dart';
-import 'screens/quotations_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/add_client_screen.dart';
 import 'screens/create_invoice_screen.dart';
