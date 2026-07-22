@@ -30,8 +30,6 @@ void main() async {
   Hive.registerAdapter(InvoiceAdapter());
   Hive.registerAdapter(QuotationAdapter());
 
-  await NotificationService.init();
-
   final clientService = ClientService();
   await clientService.init();
 
@@ -47,7 +45,12 @@ void main() async {
   final quotationService = QuotationService();
   await quotationService.init();
 
-  await DummyDataService.populateIfNeeded();
+  // Populate dummy data (boxes are already open from init calls above)
+  try {
+    await DummyDataService.populateIfNeeded();
+  } catch (e) {
+    debugPrint('DummyDataService error: $e');
+  }
 
   runApp(
     MultiProvider(
@@ -61,6 +64,16 @@ void main() async {
       child: const SimkaApp(),
     ),
   );
+
+  // Initialize notifications AFTER the UI has rendered
+  // so the permission dialog doesn't block the splash screen
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    try {
+      await NotificationService.init();
+    } catch (e) {
+      debugPrint('NotificationService init error: $e');
+    }
+  });
 }
 
 class SimkaApp extends StatelessWidget {
