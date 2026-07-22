@@ -253,130 +253,248 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStatsArea(ClientService svc) {
+    final activeCount = svc.activeClients.length;
+    final overdueCount = svc.overdueClients.length;
+    final urgentCount = svc.urgentClients.length;
+    final upcomingCount = svc.upcomingClients.length;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Glassmorphic Hero Stat ──────────────────────────────
-          GlassCard(
-            padding: const EdgeInsets.all(28),
+          // ── Primary Hero Stat: Active Clients (Wide Editorial Card)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceDark,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
+            ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppTheme.fireRed, AppTheme.emberOrange],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.fireRed.withValues(alpha: 0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      )
-                    ],
-                  ),
-                  child: const Icon(Icons.business_center_rounded,
-                      color: Colors.white, size: 36),
-                ),
-                const SizedBox(width: 24),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Active Clients',
+                      'ACTIVE CLIENT ROSTER',
                       style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
+                        color: AppTheme.textMuted,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
-                      svc.activeClients.length.toString(),
+                      '$activeCount',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 48,
+                        fontSize: 42,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: -2,
+                        letterSpacing: -1.5,
                         height: 1.1,
                       ),
                     ),
                   ],
                 ),
+                // Subtle non-badge status tag
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.successGreen,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'System Operational',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // ── Horizontal Glass Stats ──────────────────────────────
+
+          const SizedBox(height: 12),
+
+          // ── Asymmetrical Grid: Overdue (Urgent Visual Anchor) vs Neutral Metrics
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSmallGlassStat(
-                'Overdue',
-                svc.overdueClients.length,
-                AppTheme.dangerRed,
-                Icons.error_outline_rounded,
+              // Overdue Card (Wider visual anchor with red accent border & pop)
+              Expanded(
+                flex: 5,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceDark,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: overdueCount > 0
+                          ? AppTheme.fireRed.withValues(alpha: 0.6)
+                          : Colors.white.withValues(alpha: 0.08),
+                      width: overdueCount > 0 ? 1.5 : 1,
+                    ),
+                    boxShadow: overdueCount > 0
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.fireRed.withValues(alpha: 0.15),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'OVERDUE',
+                            style: TextStyle(
+                              color: AppTheme.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          if (overdueCount > 0)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.fireRed,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '$overdueCount',
+                        style: TextStyle(
+                          color: overdueCount > 0 ? AppTheme.fireRed : Colors.white,
+                          fontSize: 36,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        overdueCount == 1 ? 'Action Required' : 'Actions Required',
+                        style: TextStyle(
+                          color: overdueCount > 0 ? AppTheme.fireRed.withValues(alpha: 0.8) : AppTheme.textMuted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(width: 16),
-              _buildSmallGlassStat(
-                'Urgent',
-                svc.urgentClients.length,
-                AppTheme.emberOrange,
-                Icons.warning_amber_rounded,
-              ),
-              const SizedBox(width: 16),
-              _buildSmallGlassStat(
-                'Upcoming',
-                svc.upcomingClients.length,
-                AppTheme.warningAmber,
-                Icons.schedule_rounded,
+
+              const SizedBox(width: 12),
+
+              // Stacked Column for Urgent & Upcoming (Clean Neutral Monochromes)
+              Expanded(
+                flex: 4,
+                child: Column(
+                  children: [
+                    // Urgent Card (Neutral monochrome)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceDark,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'URGENT',
+                            style: TextStyle(
+                              color: AppTheme.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          Text(
+                            '$urgentCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Upcoming Card (Neutral monochrome)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceDark,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'UPCOMING',
+                            style: TextStyle(
+                              color: AppTheme.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          Text(
+                            '$upcomingCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSmallGlassStat(String label, int value, Color color, IconData icon) {
-    return Expanded(
-      child: GlassCard(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 16),
-            Text(
-              value.toString(),
-              style: TextStyle(
-                color: color,
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -1,
-                shadows: [
-                  Shadow(
-                    color: color.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
