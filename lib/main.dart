@@ -20,60 +20,187 @@ import 'screens/invoices_screen.dart';
 import 'screens/quotations_screen.dart';
 import 'screens/reports_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  runApp(const AppBootstrap());
+}
 
-  await Hive.initFlutter();
-  Hive.registerAdapter(ClientAdapter());
-  Hive.registerAdapter(ServiceRecordAdapter());
-  Hive.registerAdapter(PaymentAdapter());
-  Hive.registerAdapter(InvoiceAdapter());
-  Hive.registerAdapter(QuotationAdapter());
+class AppServices {
+  final ClientService clientService;
+  final ServiceRecordService serviceRecordService;
+  final PaymentService paymentService;
+  final InvoiceService invoiceService;
+  final QuotationService quotationService;
 
-  final clientService = ClientService();
-  await clientService.init();
+  AppServices({
+    required this.clientService,
+    required this.serviceRecordService,
+    required this.paymentService,
+    required this.invoiceService,
+    required this.quotationService,
+  });
+}
 
-  final serviceRecordService = ServiceRecordService();
-  await serviceRecordService.init();
+class AppBootstrap extends StatefulWidget {
+  const AppBootstrap({super.key});
 
-  final paymentService = PaymentService();
-  await paymentService.init();
+  @override
+  State<AppBootstrap> createState() => _AppBootstrapState();
+}
 
-  final invoiceService = InvoiceService();
-  await invoiceService.init();
+class _AppBootstrapState extends State<AppBootstrap> {
+  late Future<AppServices> _initFuture;
 
-  final quotationService = QuotationService();
-  await quotationService.init();
-
-  // Populate dummy data (boxes are already open from init calls above)
-  try {
-    await DummyDataService.populateIfNeeded();
-  } catch (e) {
-    debugPrint('DummyDataService error: $e');
+  @override
+  void initState() {
+    super.initState();
+    _initFuture = _initApp();
   }
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: clientService),
-        ChangeNotifierProvider.value(value: serviceRecordService),
-        ChangeNotifierProvider.value(value: paymentService),
-        ChangeNotifierProvider.value(value: invoiceService),
-        ChangeNotifierProvider.value(value: quotationService),
-      ],
-      child: const SimkaApp(),
-    ),
-  );
-
-  // Initialize notifications AFTER the UI has rendered
-  // so the permission dialog doesn't block the splash screen
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
+  Future<AppServices> _initApp() async {
     try {
-      await NotificationService.init();
-    } catch (e) {
-      debugPrint('NotificationService init error: $e');
+      await Hive.initFlutter();
+      if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(ClientAdapter());
+      if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(ServiceRecordAdapter());
+      if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(PaymentAdapter());
+      if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(InvoiceAdapter());
+      if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(QuotationAdapter());
+
+      final clientService = ClientService();
+      await clientService.init();
+
+      final serviceRecordService = ServiceRecordService();
+      await serviceRecordService.init();
+
+      final paymentService = PaymentService();
+      await paymentService.init();
+
+      final invoiceService = InvoiceService();
+      await invoiceService.init();
+
+      final quotationService = QuotationService();
+      await quotationService.init();
+
+      try {
+        await DummyDataService.populateIfNeeded();
+      } catch (e) {
+        debugPrint('DummyData error: $e');
+      }
+
+      try {
+        await NotificationService.init();
+      } catch (e) {
+        debugPrint('Notification error: $e');
+      }
+
+      return AppServices(
+        clientService: clientService,
+        serviceRecordService: serviceRecordService,
+        paymentService: paymentService,
+        invoiceService: invoiceService,
+        quotationService: quotationService,
+      );
+    } catch (e, stack) {
+      debugPrint('Fatal init error: $e\n$stack');
+      rethrow;
     }
-  });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<AppServices>(
+      future: _initFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final services = snapshot.data!;
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(value: services.clientService),
+              ChangeNotifierProvider.value(value: services.serviceRecordService),
+              ChangeNotifierProvider.value(value: services.paymentService),
+              ChangeNotifierProvider.value(value: services.invoiceService),
+              ChangeNotifierProvider.value(value: services.quotationService),
+            ],
+            child: const SimkaApp(),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+              backgroundColor: AppTheme.darkBg,
+              body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppTheme.fireRed, size: 48),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Initialization Error',
+                        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${snapshot.error}',
+                        style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _initFuture = _initApp();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.fireRed),
+                        child: const Text('Retry'),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          home: Scaffold(
+            backgroundColor: AppTheme.darkBg,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppTheme.fireRed, AppTheme.emberOrange],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(Icons.local_fire_department_rounded, color: Colors.white, size: 42),
+                  ),
+                  const SizedBox(height: 24),
+                  const CircularProgressIndicator(color: AppTheme.fireRed),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'SIMKA Fire Services',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class SimkaApp extends StatelessWidget {
