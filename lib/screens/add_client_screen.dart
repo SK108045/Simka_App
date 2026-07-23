@@ -19,22 +19,11 @@ class _AddClientScreenState extends State<AddClientScreen> {
   final _nameCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
-  final _notesCtrl = TextEditingController();
+  final List<TextEditingController> _serviceTypeCtrls = [TextEditingController()];
 
-  String _serviceType = 'Fire Extinguisher';
   DateTime _lastServiceDate = DateTime.now();
   DateTime _nextServiceDate = DateTime.now().add(const Duration(days: 90));
   bool _saving = false;
-
-  final List<String> _serviceTypes = [
-    'Fire Extinguisher',
-    'Fire Suppression System',
-    'Fire Alarm System',
-    'Sprinkler System',
-    'Emergency Lighting',
-    'Fire Hose Reel',
-    'General Fire Inspection',
-  ];
 
   bool get _isEditing => widget.existingClient != null;
 
@@ -46,8 +35,14 @@ class _AddClientScreenState extends State<AddClientScreen> {
       _nameCtrl.text = c.name;
       _phoneCtrl.text = c.phone;
       _addressCtrl.text = c.address;
-      _notesCtrl.text = c.notes;
-      _serviceType = c.serviceType;
+      if (c.serviceType.contains(', ')) {
+        _serviceTypeCtrls.clear();
+        for (var s in c.serviceType.split(', ')) {
+          _serviceTypeCtrls.add(TextEditingController(text: s));
+        }
+      } else {
+        _serviceTypeCtrls[0].text = c.serviceType;
+      }
       _lastServiceDate = c.lastServiceDate;
       _nextServiceDate = c.nextServiceDate;
     }
@@ -58,7 +53,9 @@ class _AddClientScreenState extends State<AddClientScreen> {
     _nameCtrl.dispose();
     _phoneCtrl.dispose();
     _addressCtrl.dispose();
-    _notesCtrl.dispose();
+    for (var ctrl in _serviceTypeCtrls) {
+      ctrl.dispose();
+    }
     super.dispose();
   }
 
@@ -96,15 +93,20 @@ class _AddClientScreenState extends State<AddClientScreen> {
 
     final svc = context.read<ClientService>();
     try {
+      final combinedServices = _serviceTypeCtrls
+          .map((c) => c.text.trim())
+          .where((s) => s.isNotEmpty)
+          .join(', ');
+
       if (_isEditing) {
         final updated = widget.existingClient!.copyWith(
           name: _nameCtrl.text.trim(),
           phone: _phoneCtrl.text.trim(),
           address: _addressCtrl.text.trim(),
-          serviceType: _serviceType,
+          serviceType: combinedServices,
           lastServiceDate: _lastServiceDate,
           nextServiceDate: _nextServiceDate,
-          notes: _notesCtrl.text.trim(),
+          notes: widget.existingClient!.notes,
         );
         await svc.updateClient(updated);
       } else {
@@ -112,10 +114,10 @@ class _AddClientScreenState extends State<AddClientScreen> {
           name: _nameCtrl.text.trim(),
           phone: _phoneCtrl.text.trim(),
           address: _addressCtrl.text.trim(),
-          serviceType: _serviceType,
+          serviceType: combinedServices,
           lastServiceDate: _lastServiceDate,
           nextServiceDate: _nextServiceDate,
-          notes: _notesCtrl.text.trim(),
+          notes: '',
         );
       }
       if (mounted) Navigator.pop(context, true);
@@ -195,44 +197,62 @@ class _AddClientScreenState extends State<AddClientScreen> {
                   v == null || v.trim().isEmpty ? 'Address is required' : null,
             ),
             const SizedBox(height: 24),
-            _sectionLabel('Service Details'),
-            const SizedBox(height: 12),
-            // Service type dropdown
-            Container(
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceDark,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.borderColor),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _serviceType,
-                  isExpanded: true,
-                  dropdownColor: AppTheme.cardDark,
-                  icon: const Icon(Icons.expand_more, color: AppTheme.textMuted),
-                  items: _serviceTypes.map((t) {
-                    return DropdownMenuItem(
-                      value: t,
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.fire_extinguisher_rounded,
-                            color: AppTheme.fireRed,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(t,
-                              style:
-                                  const TextStyle(color: AppTheme.textPrimary)),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (v) => setState(() => _serviceType = v!),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _sectionLabel('Service Details'),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _serviceTypeCtrls.add(TextEditingController());
+                    });
+                  },
+                  icon: const Icon(Icons.add_circle_outline, color: AppTheme.fireRed, size: 20),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
-              ),
+              ],
             ),
+            const SizedBox(height: 12),
+            ..._serviceTypeCtrls.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final ctrl = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        controller: ctrl,
+                        label: idx == 0 ? 'Service Type (e.g. Fire Extinguisher)' : 'Additional Service',
+                        icon: Icons.fire_extinguisher_rounded,
+                        validator: idx == 0 ? (v) => v == null || v.trim().isEmpty ? 'Service Type is required' : null : null,
+                      ),
+                    ),
+                    if (idx > 0) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () {
+                          // Unfocus the field before removing to prevent focus-related crash
+                          FocusScope.of(context).unfocus();
+                          
+                          // Store controller reference to dispose AFTER the frame finishes rendering
+                          final ctrlToDispose = _serviceTypeCtrls[idx];
+                          
+                          setState(() {
+                            _serviceTypeCtrls.removeAt(idx);
+                          });
+                          
+                          // Dispose safely after the widget is fully removed from the tree
+                          Future.microtask(() => ctrlToDispose.dispose());
+                        },
+                        icon: const Icon(Icons.remove_circle_outline, color: AppTheme.textMuted),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }),
             const SizedBox(height: 14),
             // Last service date
             _buildDateTile(
@@ -251,17 +271,6 @@ class _AddClientScreenState extends State<AddClientScreen> {
               onTap: () => _pickDate(true),
               df: df,
               highlight: true,
-            ),
-            const SizedBox(height: 24),
-            _sectionLabel('Notes (optional)'),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _notesCtrl,
-              maxLines: 3,
-              style: const TextStyle(color: AppTheme.textPrimary),
-              decoration: const InputDecoration(
-                hintText: 'Any additional notes about this client...',
-              ),
             ),
             const SizedBox(height: 32),
             SizedBox(

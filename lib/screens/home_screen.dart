@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/client.dart';
 import '../services/client_service.dart';
+import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/client_card.dart';
 import '../widgets/background_glow.dart';
@@ -192,6 +193,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHeader() {
+    final hour = DateTime.now().hour;
+    String greeting = 'Good Evening,';
+    if (hour < 12) {
+      greeting = 'Good Morning,';
+    } else if (hour < 17) {
+      greeting = 'Good Afternoon,';
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 40, 28, 32),
       child: Row(
@@ -218,9 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Good Morning,',
-                style: TextStyle(
+              Text(
+                greeting,
+                style: const TextStyle(
                   color: AppTheme.textMuted,
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
@@ -235,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   end: Alignment.bottomRight,
                 ).createShader(bounds),
                 child: const Text(
-                  'Simka Team.',
+                  'Hello Eunice.',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 38,
@@ -246,7 +255,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          _AnimatedAvatar(),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () async {
+                  await NotificationService.showTestNotification();
+                },
+                icon: const Icon(Icons.notifications_active_rounded, color: AppTheme.fireRed),
+              ),
+              const SizedBox(width: 8),
+              _AnimatedAvatar(),
+            ],
+          ),
         ],
       ),
     );
@@ -259,73 +279,186 @@ class _HomeScreenState extends State<HomeScreen> {
     final upcomingCount = svc.upcomingClients.length;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Primary Hero Stat: Active Clients (Wide Editorial Card)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceDark,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'ACTIVE CLIENT ROSTER',
-                      style: TextStyle(
-                        color: AppTheme.textMuted,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '$activeCount',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 42,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1.5,
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
+          // ── Big Hero Counter (Cardless, sitting directly on background)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$activeCount',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 64,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -3,
+                  height: 1.0,
                 ),
-                // Subtle non-badge status tag
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+              ),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'ACTIVE CLIENTS',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
                       Container(
-                        width: 8,
-                        height: 8,
+                        width: 6,
+                        height: 6,
                         decoration: const BoxDecoration(
                           color: AppTheme.successGreen,
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       const Text(
                         'System Operational',
                         style: TextStyle(
-                          color: AppTheme.textSecondary,
+                          color: AppTheme.textMuted,
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 28),
+
+          // ── Minimalist Metric Strip (Cardless, hairline separated)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            ),
+            child: Row(
+              children: [
+                // Overdue Metric
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'OVERDUE',
+                            style: TextStyle(
+                              color: overdueCount > 0 ? AppTheme.fireRed : AppTheme.textMuted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          if (overdueCount > 0) ...[
+                            const SizedBox(width: 5),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.fireRed,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '$overdueCount',
+                        style: TextStyle(
+                          color: overdueCount > 0 ? AppTheme.fireRed : Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Vertical Hairline Divider
+                Container(
+                  height: 32,
+                  width: 1,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                const SizedBox(width: 16),
+
+                // Urgent Metric
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'URGENT',
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '$urgentCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Vertical Hairline Divider
+                Container(
+                  height: 32,
+                  width: 1,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                const SizedBox(width: 16),
+
+                // Upcoming Metric
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'UPCOMING',
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '$upcomingCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
                         ),
                       ),
                     ],
@@ -333,166 +466,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // ── Asymmetrical Grid: Overdue (Urgent Visual Anchor) vs Neutral Metrics
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Overdue Card (Wider visual anchor with red accent border & pop)
-              Expanded(
-                flex: 5,
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: overdueCount > 0
-                          ? AppTheme.fireRed.withValues(alpha: 0.6)
-                          : Colors.white.withValues(alpha: 0.08),
-                      width: overdueCount > 0 ? 1.5 : 1,
-                    ),
-                    boxShadow: overdueCount > 0
-                        ? [
-                            BoxShadow(
-                              color: AppTheme.fireRed.withValues(alpha: 0.15),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'OVERDUE',
-                            style: TextStyle(
-                              color: AppTheme.textMuted,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          if (overdueCount > 0)
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: AppTheme.fireRed,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '$overdueCount',
-                        style: TextStyle(
-                          color: overdueCount > 0 ? AppTheme.fireRed : Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        overdueCount == 1 ? 'Action Required' : 'Actions Required',
-                        style: TextStyle(
-                          color: overdueCount > 0 ? AppTheme.fireRed.withValues(alpha: 0.8) : AppTheme.textMuted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              // Stacked Column for Urgent & Upcoming (Clean Neutral Monochromes)
-              Expanded(
-                flex: 4,
-                child: Column(
-                  children: [
-                    // Urgent Card (Neutral monochrome)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: AppTheme.surfaceDark,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'URGENT',
-                            style: TextStyle(
-                              color: AppTheme.textMuted,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          Text(
-                            '$urgentCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Upcoming Card (Neutral monochrome)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: AppTheme.surfaceDark,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'UPCOMING',
-                            style: TextStyle(
-                              color: AppTheme.textMuted,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          Text(
-                            '$upcomingCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),

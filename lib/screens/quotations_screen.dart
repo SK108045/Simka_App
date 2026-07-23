@@ -16,7 +16,8 @@ import '../widgets/fade_in.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class QuotationsScreen extends StatefulWidget {
-  const QuotationsScreen({super.key});
+  final Widget? topNavigation;
+  const QuotationsScreen({super.key, this.topNavigation});
 
   @override
   State<QuotationsScreen> createState() => _QuotationsScreenState();
@@ -57,7 +58,8 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
     return Scaffold(
       backgroundColor: AppTheme.darkBg,
       appBar: AppBar(
-        title: const Text('Quotations'),
+        title: widget.topNavigation ?? const Text('Quotations'),
+        centerTitle: true,
         backgroundColor: AppTheme.darkBg,
         elevation: 0,
       ),

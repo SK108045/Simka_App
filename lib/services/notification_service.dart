@@ -128,6 +128,17 @@ class NotificationService {
     await _plugin.cancelAll();
   }
 
+  /// Trigger an immediate test notification
+  static Future<void> showTestNotification() async {
+    if (kIsWeb) return;
+    await _plugin.show(
+      9999, // Random high ID for test
+      '🔥 SIMKA Test Notification',
+      'You have a client due for service today! (Test)',
+      NotificationDetails(android: _androidDetails),
+    );
+  }
+
   /// Helper: build a TZDateTime at a specific date and hour
   static tz.TZDateTime _tzAt(DateTime date, int hour) {
     return tz.TZDateTime(

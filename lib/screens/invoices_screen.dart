@@ -75,15 +75,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   @override
   Widget build(BuildContext context) {
     if (_activeSubTab == 1) {
-      return Scaffold(
-        backgroundColor: AppTheme.darkBg,
-        body: Column(
-          children: [
-            const SizedBox(height: 48),
-            _buildTabSegmentToggle(),
-            const Expanded(child: QuotationsScreen()),
-          ],
-        ),
+      return QuotationsScreen(
+        topNavigation: _buildTabSegmentToggle(),
       );
     }
 

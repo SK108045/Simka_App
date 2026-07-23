@@ -20,6 +20,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +69,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     firstDay: DateTime(2024),
                     lastDay: DateTime(2030),
                     focusedDay: _focusedDay,
+                    calendarFormat: _calendarFormat,
+                    onFormatChanged: (format) {
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    },
                     selectedDayPredicate: (day) =>
                         isSameDay(_selectedDay, day),
                     onDaySelected: (selected, focused) {
@@ -96,24 +103,53 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         color: AppTheme.fireRed,
                         shape: BoxShape.circle,
                       ),
-                      markerDecoration: const BoxDecoration(
-                        color: AppTheme.emberOrange,
-                        shape: BoxShape.circle,
-                      ),
-                      markerSize: 5,
-                      markersMaxCount: 3,
                     ),
-                    headerStyle: const HeaderStyle(
-                      formatButtonVisible: false,
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, date, events) {
+                        if (events.isEmpty) return const SizedBox();
+                        
+                        final now = DateTime.now();
+                        final today = DateTime(now.year, now.month, now.day);
+                        final dayDate = DateTime(date.year, date.month, date.day);
+                        
+                        final color = dayDate.isBefore(today) 
+                            ? AppTheme.successGreen 
+                            : AppTheme.fireRed;
+                            
+                        return Center(
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: color, width: 2.0),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    headerStyle: HeaderStyle(
+                      formatButtonVisible: true,
+                      formatButtonShowsNext: false,
+                      formatButtonDecoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                      ),
+                      formatButtonTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                       titleCentered: true,
-                      titleTextStyle: TextStyle(
+                      titleTextStyle: const TextStyle(
                         color: AppTheme.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                       leftChevronIcon:
-                          Icon(Icons.chevron_left, color: AppTheme.textSecondary),
-                      rightChevronIcon: Icon(Icons.chevron_right,
+                          const Icon(Icons.chevron_left, color: AppTheme.textSecondary),
+                      rightChevronIcon: const Icon(Icons.chevron_right,
                           color: AppTheme.textSecondary),
                     ),
                     daysOfWeekStyle: const DaysOfWeekStyle(
@@ -247,15 +283,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   Text(client.name,
                       style: const TextStyle(
                           color: AppTheme.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15)),
-                  Text(client.serviceType,
-                      style: const TextStyle(
-                          color: AppTheme.textMuted, fontSize: 13)),
-                  Text(client.address,
-                      style: const TextStyle(
-                          color: AppTheme.textMuted, fontSize: 12),
-                      overflow: TextOverflow.ellipsis),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16)),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.location_on_rounded, color: AppTheme.fireRed, size: 14),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(client.address,
+                            style: const TextStyle(
+                                color: AppTheme.textMuted, fontSize: 13),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
