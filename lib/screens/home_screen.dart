@@ -9,8 +9,8 @@ import '../widgets/client_card.dart';
 import '../widgets/background_glow.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/fade_in.dart';
-import 'add_client_screen.dart';
 import 'client_detail_screen.dart';
+import 'all_clients_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,12 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _openAddClient() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const AddClientScreen()),
-    );
-  }
+
 
   void _openClientDetail(Client client) {
     Navigator.push(
@@ -54,6 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 final allClients = _searchQuery.isEmpty
                     ? svc.activeClients
                     : svc.search(_searchQuery);
+                
+                final displayClients = _searchQuery.isEmpty && allClients.length > 3
+                    ? allClients.take(3).toList()
+                    : allClients;
 
                 return CustomScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -126,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                     // ── Client List
-                    if (allClients.isEmpty)
+                    if (displayClients.isEmpty)
                       SliverToBoxAdapter(
                         child: _FadeIn(delayMs: 400, child: _buildEmptyState()),
                       )
@@ -140,12 +139,51 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: ClientCard(
-                                  client: allClients[i],
-                                  onTap: () => _openClientDetail(allClients[i]),
+                                  client: displayClients[i],
+                                  onTap: () => _openClientDetail(displayClients[i]),
                                 ),
                               ),
                             ),
-                            childCount: allClients.length,
+                            childCount: displayClients.length,
+                          ),
+                        ),
+                      ),
+
+                    if (_searchQuery.isEmpty && allClients.length > 3)
+                      SliverToBoxAdapter(
+                        child: FadeIn(
+                          delayMs: 600,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 54,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const AllClientsScreen(),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.white.withValues(alpha: 0.05),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                                  ),
+                                ),
+                                child: Text(
+                                  'View All ${allClients.length} Clients',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -159,36 +197,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-      floatingActionButton: FadeIn(
-        delayMs: 500,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.fireRed.withValues(alpha: 0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              )
-            ],
-          ),
-          child: FloatingActionButton.extended(
-            onPressed: _openAddClient,
-            backgroundColor: AppTheme.fireRed,
-            elevation: 0,
-            icon: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
-            label: const Text(
-              'Add Client',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 

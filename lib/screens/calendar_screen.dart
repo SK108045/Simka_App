@@ -295,7 +295,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         child: Text(client.address,
                             style: const TextStyle(
                                 color: AppTheme.textMuted, fontSize: 13),
-                            maxLines: 2,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.build_circle_rounded, color: AppTheme.emberOrange, size: 14),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text('${client.serviceType}  •  ${DateFormat('MMM d, yyyy').format(client.nextServiceDate)}',
+                            style: const TextStyle(
+                                color: AppTheme.textMuted, fontSize: 13),
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis),
                       ),
                     ],
