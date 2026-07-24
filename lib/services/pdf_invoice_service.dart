@@ -129,8 +129,9 @@ class PdfInvoiceService {
               children: [
                 pw.Container(width: 216, height: 9, color: _darkBlue),
                 pw.SizedBox(height: 19),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.only(left: 6),
+                pw.Container(
+                  width: 216,
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 6),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
@@ -153,15 +154,12 @@ class PdfInvoiceService {
   }
 
   static pw.Widget _buildMetaRow(String label, String value) {
-    return pw.Container(
-      width: 216,
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(label, style: const pw.TextStyle(fontSize: 10)),
-          pw.Text(value, style: const pw.TextStyle(fontSize: 10)),
-        ],
-      ),
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(label, style: const pw.TextStyle(fontSize: 10)),
+        pw.Text(value, style: const pw.TextStyle(fontSize: 10)),
+      ],
     );
   }
 
