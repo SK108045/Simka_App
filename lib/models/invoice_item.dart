@@ -20,23 +20,17 @@ class InvoiceItem {
       };
 
   factory InvoiceItem.fromJson(Map<String, dynamic> json) => InvoiceItem(
-        description: (json['description'] as String?) ?? (json['desc'] as String?) ?? '',
-        quantity: (json['quantity'] as num?)?.toDouble() ?? (json['qty'] as num?)?.toDouble() ?? 1.0,
-        unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? (json['unit_price'] as num?)?.toDouble() ?? 0.0,
+        description: json['description'] as String,
+        quantity: (json['quantity'] as num).toDouble(),
+        unitPrice: (json['unitPrice'] as num).toDouble(),
       );
 
   static List<InvoiceItem> listFromJson(String jsonStr) {
-    if (jsonStr.trim().isEmpty) return [];
-    try {
-      final List<dynamic> decoded = jsonDecode(jsonStr);
-      return decoded
-          .where((e) => e is Map)
-          .map((e) => InvoiceItem.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList();
-    } catch (e) {
-      return [];
-    }
+    if (jsonStr.isEmpty) return [];
+    final List<dynamic> decoded = jsonDecode(jsonStr);
+    return decoded.map((e) => InvoiceItem.fromJson(e as Map<String, dynamic>)).toList();
   }
+
   static String listToJson(List<InvoiceItem> items) {
     return jsonEncode(items.map((e) => e.toJson()).toList());
   }
