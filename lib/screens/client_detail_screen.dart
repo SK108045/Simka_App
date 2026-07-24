@@ -472,6 +472,74 @@ class ClientDetailScreen extends StatelessWidget {
     );
   }
 
+  void _showAddPaymentDialog(BuildContext context, Client client) {
+    final amountCtrl = TextEditingController();
+    final notesCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.cardDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Add Payment', style: TextStyle(color: AppTheme.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: amountCtrl,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              style: const TextStyle(color: AppTheme.textPrimary),
+              decoration: const InputDecoration(
+                labelText: 'Amount Paid (\$)',
+                labelStyle: TextStyle(color: AppTheme.textMuted),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.borderColor)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.fireRed)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: notesCtrl,
+              style: const TextStyle(color: AppTheme.textPrimary),
+              decoration: const InputDecoration(
+                labelText: 'Notes (optional)',
+                labelStyle: TextStyle(color: AppTheme.textMuted),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.borderColor)),
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.fireRed)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.successGreen, foregroundColor: Colors.white),
+            onPressed: () async {
+              final amt = double.tryParse(amountCtrl.text) ?? 0;
+              if (amt <= 0) return;
+              
+              final pSvc = context.read<PaymentService>();
+              await pSvc.addPayment(
+                clientId: client.id,
+                clientName: client.name,
+                amount: 0,
+                amountPaid: amt,
+                date: DateTime.now(),
+                description: 'Direct Payment',
+                notes: notesCtrl.text,
+              );
+              
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Save Payment'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildServiceHistorySection(BuildContext context) {
     final records = context.watch<ServiceRecordService>().getRecordsForClient(client.id);
     final df = DateFormat('dd MMM yyyy');
@@ -521,8 +589,19 @@ class ClientDetailScreen extends StatelessWidget {
         title: Text(p.description.isEmpty ? 'Payment/Invoice' : p.description, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
         subtitle: Text(df.format(p.date), style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-        trailing: Text('\$${p.amount.toStringAsFixed(2)}', style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+        trailing: Text(
+          p.amount == 0 ? '-\$${p.amountPaid.toStringAsFixed(2)}' : '\$${p.amount.toStringAsFixed(2)}', 
+          style: TextStyle(
+            color: p.amount == 0 ? AppTheme.successGreen : AppTheme.textPrimary, 
+            fontWeight: FontWeight.w600
+          )
+        ),
       )),
-    ], action: const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.textMuted, size: 16));
+    ], action: IconButton(
+      icon: const Icon(Icons.add_circle_outline_rounded, color: AppTheme.fireRed, size: 20),
+      constraints: const BoxConstraints(),
+      padding: EdgeInsets.zero,
+      onPressed: () => _showAddPaymentDialog(context, client),
+    ));
   }
 }

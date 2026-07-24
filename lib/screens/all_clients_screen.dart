@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/client_service.dart';
+import '../services/service_record_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/client_card.dart';
 import '../widgets/background_glow.dart';
@@ -106,6 +107,13 @@ class _AllClientsScreenState extends State<AllClientsScreen> {
                               int interval = client.nextServiceDate.difference(client.lastServiceDate).inDays;
                               if (interval <= 0) interval = 180;
                               svc.markServiced(client, interval);
+                              context.read<ServiceRecordService>().addRecord(
+                                clientId: client.id,
+                                clientName: client.name,
+                                serviceDate: DateTime.now(),
+                                serviceType: client.serviceType,
+                                description: 'Routine Maintenance - Marked as Serviced',
+                              );
                             },
                             onTap: () {
                               Navigator.push(

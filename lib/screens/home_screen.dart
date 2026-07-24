@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/client.dart';
 import '../services/client_service.dart';
 import '../services/notification_service.dart';
+import '../services/service_record_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/client_card.dart';
 import '../widgets/background_glow.dart';
@@ -145,6 +146,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     int interval = displayClients[i].nextServiceDate.difference(displayClients[i].lastServiceDate).inDays;
                                     if (interval <= 0) interval = 180;
                                     svc.markServiced(displayClients[i], interval);
+                                    context.read<ServiceRecordService>().addRecord(
+                                      clientId: displayClients[i].id,
+                                      clientName: displayClients[i].name,
+                                      serviceDate: DateTime.now(),
+                                      serviceType: displayClients[i].serviceType,
+                                      description: 'Routine Maintenance - Marked as Serviced',
+                                    );
                                   },
                                   onTap: () => _openClientDetail(displayClients[i]),
                                 ),

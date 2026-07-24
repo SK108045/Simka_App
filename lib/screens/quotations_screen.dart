@@ -24,15 +24,9 @@ class QuotationsScreen extends StatefulWidget {
 }
 
 class _QuotationsScreenState extends State<QuotationsScreen> {
-  // null means "All"
-  String? _filterStatus;
-
-  static const _filters = <String?>[null, 'draft', 'sent', 'accepted', 'rejected'];
-  static const _filterLabels = ['All', 'Draft', 'Sent', 'Accepted', 'Rejected'];
-
+  // No filters for quotations anymore
   List<Quotation> _apply(List<Quotation> all) {
-    if (_filterStatus == null) return all;
-    return all.where((q) => q.status == _filterStatus).toList();
+    return all;
   }
 
   Color _statusColor(String status) {
@@ -76,48 +70,6 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Filter Chips ──────────────────────────────────────────────────
-            FadeIn(
-              delayMs: 100,
-              child: SizedBox(
-                height: 52,
-                child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _filters.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final selected = _filterStatus == _filters[i];
-                return GestureDetector(
-                  onTap: () => setState(() => _filterStatus = _filters[i]),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppTheme.fireRed.withValues(alpha: 0.15)
-                          : AppTheme.surfaceDark,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: selected ? AppTheme.fireRed : AppTheme.borderColor,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      _filterLabels[i],
-                      style: TextStyle(
-                        color: selected ? AppTheme.fireRed : AppTheme.textSecondary,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-              ),
-            ),
-
             // ── List ─────────────────────────────────────────────────────────
             Expanded(
             child: Consumer<QuotationService>(
