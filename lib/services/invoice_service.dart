@@ -49,7 +49,7 @@ class InvoiceService extends ChangeNotifier {
     double taxRate = 0.16,
     String status = 'draft',
     String notes = '',
-    String currency = 'KES',
+    String currency = 'USD',
   }) async {
     final id = _uuid.v4();
     final invoice = Invoice(

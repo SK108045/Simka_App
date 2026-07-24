@@ -33,8 +33,8 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
   double _taxRate = 0.16;
 
   // Currency
-  String _currency = 'KES';
-  static const _currencies = ['KES', 'USD', 'EUR', 'GBP'];
+  String _currency = 'USD';
+  static const _currencies = ['USD', 'USD', 'EUR', 'GBP'];
 
   // Line Items
   final List<_ItemRow> _items = [];
@@ -253,7 +253,7 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
                                 ))
                             .toList(),
                         onChanged: (v) =>
-                            setState(() => _currency = v ?? 'KES'),
+                            setState(() => _currency = v ?? 'USD'),
                       ),
                     ),
                   ),

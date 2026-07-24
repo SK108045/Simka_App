@@ -25,7 +25,7 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       taxRate: fields[9] as double? ?? 0.16,
       status: fields[10] as String? ?? 'draft',
       notes: fields[11] as String? ?? '',
-      currency: fields[12] as String? ?? 'KES',
+      currency: fields[12] as String? ?? 'USD',
       amountPaid: fields[13] as double? ?? 0,
     );
   }

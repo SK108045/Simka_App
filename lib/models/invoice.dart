@@ -60,7 +60,7 @@ class Invoice extends HiveObject {
     this.taxRate = 0.16,
     this.status = 'draft',
     this.notes = '',
-    this.currency = 'KES',
+    this.currency = 'USD',
     this.amountPaid = 0,
   });
 

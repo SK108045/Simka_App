@@ -11,6 +11,25 @@ class PaymentService extends ChangeNotifier {
   List<Payment> get allPayments => _box.values.toList()
     ..sort((a, b) => b.date.compareTo(a.date));
 
+  double get totalRevenue => _box.values.fold(0.0, (sum, p) => sum + p.amountPaid);
+
+  Map<String, double> getMonthlyRevenue() {
+    final now = DateTime.now();
+    final result = <String, double>{};
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    for (int i = 5; i >= 0; i--) {
+      final target = DateTime(now.year, now.month - i, 1);
+      final label = months[target.month - 1];
+      result[label] = _box.values
+          .where((p) =>
+              p.date.year == target.year &&
+              p.date.month == target.month)
+          .fold(0.0, (sum, p) => sum + p.amountPaid);
+    }
+    return result;
+  }
+
   Future<void> init() async {
     _box = await Hive.openBox<Payment>(_boxName);
     notifyListeners();

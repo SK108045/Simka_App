@@ -378,7 +378,7 @@ class _InvoiceCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'KES ${formatter.format(invoice.total)}',
+                          'USD ${formatter.format(invoice.total)}',
                           style: const TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 18,
@@ -397,7 +397,7 @@ class _InvoiceCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'KES ${formatter.format(invoice.balance)}',
+                            'USD ${formatter.format(invoice.balance)}',
                             style: TextStyle(
                               color: statusColor,
                               fontSize: 16,
@@ -486,7 +486,7 @@ class InvoiceDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Balance: KES ${NumberFormat('#,##0', 'en_US').format(invoice.balance)}',
+              'Balance: USD ${NumberFormat('#,##0', 'en_US').format(invoice.balance)}',
               style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 16),
@@ -495,9 +495,9 @@ class InvoiceDetailScreen extends StatelessWidget {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: AppTheme.textPrimary),
               decoration: InputDecoration(
-                labelText: 'Amount Paid (KES)',
+                labelText: 'Amount Paid (USD)',
                 labelStyle: const TextStyle(color: AppTheme.textMuted),
-                prefixText: 'KES ',
+                prefixText: 'USD ',
                 prefixStyle: const TextStyle(color: AppTheme.textPrimary),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -704,21 +704,21 @@ class InvoiceDetailScreen extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       // Totals
-                      _TotalRow(label: 'Subtotal', value: 'KES ${numFmt.format(invoice.subtotal)}'),
+                      _TotalRow(label: 'Subtotal', value: 'USD ${numFmt.format(invoice.subtotal)}'),
                       const SizedBox(height: 8),
-                      _TotalRow(label: 'VAT (${(invoice.taxRate * 100).toStringAsFixed(0)}%)', value: 'KES ${numFmt.format(invoice.taxAmount)}'),
+                      _TotalRow(label: 'VAT (${(invoice.taxRate * 100).toStringAsFixed(0)}%)', value: 'USD ${numFmt.format(invoice.taxAmount)}'),
                       const SizedBox(height: 12),
                       const Divider(color: AppTheme.borderColor),
                       const SizedBox(height: 12),
-                      _TotalRow(label: 'TOTAL', value: 'KES ${numFmt.format(invoice.total)}', isTotal: true),
+                      _TotalRow(label: 'TOTAL', value: 'USD ${numFmt.format(invoice.total)}', isTotal: true),
                       
                       if (invoice.amountPaid > 0) ...[
                         const SizedBox(height: 12),
-                        _TotalRow(label: 'Amount Paid', value: 'KES ${numFmt.format(invoice.amountPaid)}', valueColor: AppTheme.successGreen),
+                        _TotalRow(label: 'Amount Paid', value: 'USD ${numFmt.format(invoice.amountPaid)}', valueColor: AppTheme.successGreen),
                         const SizedBox(height: 8),
                         _TotalRow(
                           label: 'Balance Due',
-                          value: 'KES ${numFmt.format(invoice.balance)}',
+                          value: 'USD ${numFmt.format(invoice.balance)}',
                           valueColor: invoice.balance > 0 ? AppTheme.dangerRed : AppTheme.successGreen,
                         ),
                       ],

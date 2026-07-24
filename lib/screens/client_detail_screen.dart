@@ -569,17 +569,6 @@ class ClientDetailScreen extends StatelessWidget {
     final df = DateFormat('dd MMM yyyy');
     
     return _infoSection('Payments', [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Outstanding Balance:', style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-            Text('\$${totalOwed.toStringAsFixed(2)}', style: TextStyle(color: totalOwed > 0 ? AppTheme.dangerRed : AppTheme.successGreen, fontWeight: FontWeight.bold, fontSize: 16)),
-          ],
-        ),
-      ),
-      const Divider(height: 1, color: AppTheme.borderColor),
       if (payments.isEmpty)
         const Padding(
           padding: EdgeInsets.all(16),

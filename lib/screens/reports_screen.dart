@@ -7,6 +7,7 @@ import '../services/invoice_service.dart';
 import '../services/quotation_service.dart';
 import '../services/client_service.dart';
 import '../services/service_record_service.dart';
+import '../services/payment_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/background_glow.dart';
 import '../widgets/glass_card.dart';
@@ -21,6 +22,7 @@ class ReportsScreen extends StatelessWidget {
     final clientSvc = context.watch<ClientService>();
     final quoteSvc = context.watch<QuotationService>();
     final recordSvc = context.watch<ServiceRecordService>();
+    final paymentSvc = context.watch<PaymentService>();
 
     final currentMonth = DateFormat('MMMM yyyy').format(DateTime.now());
 
@@ -53,9 +55,9 @@ class ReportsScreen extends StatelessWidget {
           child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeIn(delayMs: 0, child: _buildSummaryCards(invoiceSvc, clientSvc)),
+            FadeIn(delayMs: 0, child: _buildSummaryCards(invoiceSvc, clientSvc, paymentSvc)),
             const SizedBox(height: 24),
-            FadeIn(delayMs: 100, child: _buildRevenueChart(invoiceSvc)),
+            FadeIn(delayMs: 100, child: _buildRevenueChart(paymentSvc)),
             const SizedBox(height: 24),
             FadeIn(delayMs: 200, child: _buildQuickStats(invoiceSvc, quoteSvc, recordSvc)),
             const SizedBox(height: 24),
@@ -68,7 +70,7 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCards(InvoiceService invoiceSvc, ClientService clientSvc) {
+  Widget _buildSummaryCards(InvoiceService invoiceSvc, ClientService clientSvc, PaymentService paymentSvc) {
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 16,
@@ -79,19 +81,19 @@ class ReportsScreen extends StatelessWidget {
       children: [
         _StatCard(
           title: 'Total Revenue',
-          value: 'KES ${NumberFormat('#,##0').format(invoiceSvc.totalRevenue)}',
+          value: 'USD ${NumberFormat('#,##0').format(paymentSvc.totalRevenue)}',
           icon: Icons.account_balance_wallet_rounded,
           color: AppTheme.successGreen,
         ),
         _StatCard(
           title: 'Total Invoiced',
-          value: 'KES ${NumberFormat('#,##0').format(invoiceSvc.totalInvoiced)}',
+          value: 'USD ${NumberFormat('#,##0').format(invoiceSvc.totalInvoiced)}',
           icon: Icons.receipt_long_rounded,
           color: AppTheme.emberOrange,
         ),
         _StatCard(
           title: 'Outstanding',
-          value: 'KES ${NumberFormat('#,##0').format(invoiceSvc.totalOutstanding)}',
+          value: 'USD ${NumberFormat('#,##0').format(invoiceSvc.totalOutstanding)}',
           icon: Icons.warning_rounded,
           color: AppTheme.dangerRed,
         ),
@@ -105,8 +107,8 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRevenueChart(InvoiceService invoiceSvc) {
-    final revenueData = invoiceSvc.getMonthlyRevenue();
+  Widget _buildRevenueChart(PaymentService paymentSvc) {
+    final revenueData = paymentSvc.getMonthlyRevenue();
     final keys = revenueData.keys.toList();
     final values = revenueData.values.toList();
     final maxVal = values.isEmpty ? 0.0 : values.reduce((a, b) => a > b ? a : b);
@@ -118,7 +120,7 @@ class ReportsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Monthly Revenue (KES)',
+            'Monthly Revenue (USD)',
             style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -275,7 +277,7 @@ class ReportsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('KES ${NumberFormat('#,##0').format(inv.total)}',
+                          Text('USD ${NumberFormat('#,##0').format(inv.total)}',
                               style: const TextStyle(
                                   color: AppTheme.textPrimary,
                                   fontWeight: FontWeight.bold)),

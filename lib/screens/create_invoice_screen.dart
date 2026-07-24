@@ -346,18 +346,18 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 children: [
                   _SummaryRow(
                       label: 'Subtotal',
-                      value: 'KES ${_numFmt.format(_subtotal)}'),
+                      value: 'USD ${_numFmt.format(_subtotal)}'),
                   const SizedBox(height: 8),
                   _SummaryRow(
                       label: 'VAT (16%)',
-                      value: 'KES ${_numFmt.format(_vat)}'),
+                      value: 'USD ${_numFmt.format(_vat)}'),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: Divider(color: AppTheme.borderColor),
                   ),
                   _SummaryRow(
                     label: 'TOTAL',
-                    value: 'KES ${_numFmt.format(_total)}',
+                    value: 'USD ${_numFmt.format(_total)}',
                     isTotal: true,
                   ),
                 ],
