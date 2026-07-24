@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' show Color;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -128,13 +129,27 @@ class NotificationService {
     await _plugin.cancelAll();
   }
 
-  /// Trigger an immediate test notification
+  /// Trigger an immediate test notification with a random fire joke
   static Future<void> showTestNotification() async {
     if (kIsWeb) return;
+
+    final jokes = [
+      "Why did the fire extinguisher break up with the smoke alarm? It was too clingy!",
+      "I'd tell you a fire joke, but it might just go up in smoke.",
+      "What do you call a fire extinguisher that doesn't work? A heavy red paperweight!",
+      "We make sure the only thing burning is our competition! 🔥",
+      "Is it hot in here, or did someone forget their annual Simka inspection?",
+      "Remember: P.A.S.S. Pull, Aim, Squeeze, Sweep... and pay the invoice! 😉",
+      "Don't worry, we don't start the fires... we just charge you to put them out!",
+      "I asked my fire extinguisher for a joke, but it just gave me a blank stare. It's under a lot of pressure."
+    ];
+
+    final randomJoke = jokes[Random().nextInt(jokes.length)];
+
     await _plugin.show(
       9999, // Random high ID for test
-      '🔥 SIMKA Test Notification',
-      'You have a client due for service today! (Test)',
+      '🔥 Message from David',
+      randomJoke,
       NotificationDetails(android: _androidDetails),
     );
   }
