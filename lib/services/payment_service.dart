@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/payment.dart';
+import '../models/invoice.dart';
 
 class PaymentService extends ChangeNotifier {
   static const String _boxName = 'payments';
@@ -32,6 +33,25 @@ class PaymentService extends ChangeNotifier {
 
   Future<void> init() async {
     _box = await Hive.openBox<Payment>(_boxName);
+    
+    if (_box.isEmpty) {
+      final invoiceBox = await Hive.openBox<Invoice>('invoices');
+      final invoicesWithPayments = invoiceBox.values.where((i) => i.amountPaid > 0);
+      for (var inv in invoicesWithPayments) {
+        final payment = Payment(
+          id: _uuid.v4(),
+          clientId: inv.clientId,
+          clientName: inv.clientName,
+          amount: 0,
+          amountPaid: inv.amountPaid,
+          date: inv.issueDate,
+          description: 'Payment for Invoice ${inv.invoiceNumber}',
+          invoiceNumber: inv.invoiceNumber,
+        );
+        await _box.put(payment.id, payment);
+      }
+    }
+    
     notifyListeners();
   }
 

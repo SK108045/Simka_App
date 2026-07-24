@@ -224,8 +224,10 @@ class ReportsScreen extends StatelessWidget {
     final thisMonthQuotes = quoteSvc.allQuotations
         .where((q) => q.issueDate.year == now.year && q.issueDate.month == now.month)
         .length;
-    final thisMonthServices = recordSvc.allRecords
+    final thisMonthClients = recordSvc.allRecords
         .where((r) => r.serviceDate.year == now.year && r.serviceDate.month == now.month)
+        .map((r) => r.clientId)
+        .toSet()
         .length;
 
     return Row(
@@ -234,7 +236,7 @@ class ReportsScreen extends StatelessWidget {
         const SizedBox(width: 12),
         _QuickStatBox(title: 'Quotes\nThis Month', value: '$thisMonthQuotes'),
         const SizedBox(width: 12),
-        _QuickStatBox(title: 'Services\nThis Month', value: '$thisMonthServices'),
+        _QuickStatBox(title: 'Clients\nThis Month', value: '$thisMonthClients'),
       ],
     );
   }
