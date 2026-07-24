@@ -579,7 +579,7 @@ class ClientDetailScreen extends StatelessWidget {
         subtitle: Text(df.format(p.date), style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
         trailing: Text(
-          p.amount == 0 ? '-KSH ${p.amountPaid.toStringAsFixed(2)}' : 'KSH ${p.amount.toStringAsFixed(2)}', 
+          p.amount == 0 ? 'KSH ${p.amountPaid.toStringAsFixed(2)}' : 'KSH ${p.amount.toStringAsFixed(2)}', 
           style: TextStyle(
             color: p.amount == 0 ? AppTheme.successGreen : AppTheme.textPrimary, 
             fontWeight: FontWeight.w600
