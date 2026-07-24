@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:printing/printing.dart';
 import '../models/invoice.dart';
 import '../services/invoice_service.dart';
+import '../services/invoice_pdf_service.dart';
 import '../theme/app_theme.dart';
 import 'create_invoice_screen.dart';
 import 'quotations_screen.dart';
@@ -823,6 +825,52 @@ class _InvoiceDetailSheet extends StatelessWidget {
                               color: AppTheme.dangerRed),
                           label: const Text('Delete Invoice'),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(color: AppTheme.borderColor),
+                      const SizedBox(height: 12),
+                      _SectionLabel('PDF EXPORT'),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final pdfBytes = await InvoicePdfService.generateFromInvoice(invoice);
+                                await Printing.layoutPdf(onLayout: (_) => pdfBytes);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1F548F),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                              icon: const Icon(Icons.print_rounded, color: Colors.white, size: 20),
+                              label: const Text('Print', style: TextStyle(color: Colors.white)),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final pdfBytes = await InvoicePdfService.generateFromInvoice(invoice);
+                                final safeNo = invoice.invoiceNumber.replaceAll(RegExp(r'[^a-zA-Z0-9\-_]'), '');
+                                await Printing.sharePdf(
+                                  bytes: pdfBytes,
+                                  filename: 'SIMKA_Invoice_$safeNo.pdf',
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.emberOrange,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                              icon: const Icon(Icons.download_rounded, color: Colors.white, size: 20),
+                              label: const Text('Download', style: TextStyle(color: Colors.white)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
