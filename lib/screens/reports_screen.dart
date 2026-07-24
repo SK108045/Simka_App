@@ -224,10 +224,10 @@ class ReportsScreen extends StatelessWidget {
     final thisMonthQuotes = quoteSvc.allQuotations
         .where((q) => q.issueDate.year == now.year && q.issueDate.month == now.month)
         .length;
-    final thisMonthClients = recordSvc.allRecords
-        .where((r) => r.serviceDate.year == now.year && r.serviceDate.month == now.month)
-        .map((r) => r.clientId)
-        .toSet()
+    final thisMonthClients = clientSvc.activeClients
+        .where((c) => 
+            (c.nextServiceDate.year == now.year && c.nextServiceDate.month == now.month) ||
+            (c.lastServiceDate.year == now.year && c.lastServiceDate.month == now.month))
         .length;
 
     return Row(
