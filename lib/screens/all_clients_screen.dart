@@ -101,6 +101,7 @@ class _AllClientsScreenState extends State<AllClientsScreen> {
                           padding: const EdgeInsets.only(bottom: 16),
                           child: ClientCard(
                             client: client,
+                            onDelete: () => svc.deleteClient(client),
                             onTap: () {
                               Navigator.push(
                                 context,

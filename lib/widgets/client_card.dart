@@ -7,12 +7,14 @@ class ClientCard extends StatelessWidget {
   final Client client;
   final VoidCallback onTap;
   final VoidCallback? onMarkServiced;
+  final VoidCallback? onDelete;
 
   const ClientCard({
     super.key,
     required this.client,
     required this.onTap,
     this.onMarkServiced,
+    this.onDelete,
   });
 
   Color _statusColor(ServiceStatus status) {
@@ -191,22 +193,59 @@ class ClientCard extends StatelessWidget {
                     ),
                   ),
                   // Status badge
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      status.label,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          status.label,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (onDelete != null) ...[
+                        const SizedBox(height: 16),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.delete_outline, size: 22, color: AppTheme.dangerRed),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: AppTheme.surfaceDark,
+                                title: const Text('Delete Client', style: TextStyle(color: AppTheme.textPrimary)),
+                                content: const Text('Are you sure you want to delete this client?', style: TextStyle(color: AppTheme.textSecondary)),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerRed, foregroundColor: Colors.white),
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      onDelete!();
+                                    },
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),

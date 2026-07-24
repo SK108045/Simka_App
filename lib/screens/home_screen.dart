@@ -134,12 +134,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
-                            (ctx, i) => _FadeIn(
+                            (ctx, i) => FadeIn(
                               delayMs: 400 + (i * 50),
                               child: Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: ClientCard(
                                   client: displayClients[i],
+                                  onDelete: () => svc.deleteClient(displayClients[i]),
                                   onTap: () => _openClientDetail(displayClients[i]),
                                 ),
                               ),

@@ -87,10 +87,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         elevation: 0,
         title: _buildTabSegmentToggle(),
         centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
-          child: _buildFilterRow(),
-        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.fireRed,
@@ -124,6 +120,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   return _InvoiceCard(
                     invoice: filtered[index],
                     statusColor: _statusColor(filtered[index].paymentStatus),
+                    onDelete: () => service.deleteInvoice(filtered[index].id),
                     onTap: () => _showDetailScreen(context, filtered[index]),
                   );
                 },
@@ -275,11 +272,13 @@ class _InvoiceCard extends StatelessWidget {
   final Invoice invoice;
   final Color statusColor;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   const _InvoiceCard({
     required this.invoice,
     required this.statusColor,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
@@ -312,6 +311,36 @@ class _InvoiceCard extends StatelessWidget {
                       ),
                     ),
                     _StatusBadge(label: status.label, color: statusColor),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.dangerRed),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            backgroundColor: AppTheme.surfaceDark,
+                            title: const Text('Delete Invoice', style: TextStyle(color: AppTheme.textPrimary)),
+                            content: const Text('Are you sure you want to delete this invoice?', style: TextStyle(color: AppTheme.textSecondary)),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerRed, foregroundColor: Colors.white),
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  onDelete();
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),

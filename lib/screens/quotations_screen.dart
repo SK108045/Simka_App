@@ -140,6 +140,7 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
                         quotation: quotations[i],
                         statusColor: _statusColor(quotations[i].status),
                         statusLabel: _statusLabel(quotations[i].status),
+                        onDelete: () => svc.deleteQuotation(quotations[i].id),
                         onTap: () => _showDetailSheet(context, quotations[i]),
                       ),
                   ),
@@ -172,12 +173,14 @@ class _QuotationCard extends StatelessWidget {
   final Color statusColor;
   final String statusLabel;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   const _QuotationCard({
     required this.quotation,
     required this.statusColor,
     required this.statusLabel,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
@@ -274,6 +277,36 @@ class _QuotationCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.delete_outline, size: 20, color: AppTheme.dangerRed),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: AppTheme.surfaceDark,
+                              title: const Text('Delete Quotation', style: TextStyle(color: AppTheme.textPrimary)),
+                              content: const Text('Are you sure you want to delete this quotation?', style: TextStyle(color: AppTheme.textSecondary)),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.dangerRed, foregroundColor: Colors.white),
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    onDelete();
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
