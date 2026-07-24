@@ -3,7 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
 import '../models/invoice.dart';
-
+import 'package:printing/printing.dart';
 class PdfInvoiceService {
   static const _darkBlue = PdfColor(0.121569, 0.329412, 0.560784);
   static const _lightBlue = PdfColor(0.32549, 0.556863, 0.843137);
@@ -17,10 +17,9 @@ class PdfInvoiceService {
   static Future<Uint8List> generate(Invoice invoice) async {
     final pdf = pw.Document();
 
-    pw.MemoryImage? logoImage;
+    pw.ImageProvider? logoImage;
     try {
-      final ByteData data = await rootBundle.load('assets/images/simka_logo.jpg');
-      logoImage = pw.MemoryImage(data.buffer.asUint8List());
+      logoImage = await imageFromAssetBundle('assets/images/simka_logo.jpg');
     } catch (e) {
       // Ignored if logo isn't found
     }
@@ -66,7 +65,7 @@ class PdfInvoiceService {
     return pdf.save();
   }
 
-  static pw.Widget _buildHeader(Invoice invoice, pw.MemoryImage? logoImage) {
+  static pw.Widget _buildHeader(Invoice invoice, pw.ImageProvider? logoImage) {
     final df = DateFormat('dd MMMM yyyy');
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
