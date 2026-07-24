@@ -9,6 +9,7 @@ import 'quotations_screen.dart';
 import '../widgets/background_glow.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/fade_in.dart';
+import 'pdf_preview_screen.dart';
 
 class InvoicesScreen extends StatefulWidget {
   final int initialSubTab;
@@ -597,6 +598,15 @@ class InvoiceDetailScreen extends StatelessWidget {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf, color: AppTheme.fireRed),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => PdfPreviewScreen(invoice: invoice)),
+              );
+            },
+          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
