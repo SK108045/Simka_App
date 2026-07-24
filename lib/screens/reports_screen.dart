@@ -226,9 +226,7 @@ class ReportsScreen extends StatelessWidget {
     final thisMonthInvoices = invoiceSvc.allInvoices
         .where((i) => i.issueDate.year == now.year && i.issueDate.month == now.month)
         .length;
-    final thisMonthQuotes = quoteSvc.allQuotations
-        .where((q) => q.issueDate.year == now.year && q.issueDate.month == now.month)
-        .length;
+
     final thisMonthClients = clientSvc.activeClients
         .where((c) => 
             (c.nextServiceDate.year == now.year && c.nextServiceDate.month == now.month) ||
@@ -238,8 +236,6 @@ class ReportsScreen extends StatelessWidget {
     return Row(
       children: [
         _QuickStatBox(title: 'Invoices\nThis Month', value: '$thisMonthInvoices'),
-        const SizedBox(width: 12),
-        _QuickStatBox(title: 'Quotes\nThis Month', value: '$thisMonthQuotes'),
         const SizedBox(width: 12),
         _QuickStatBox(title: 'Clients\nThis Month', value: '$thisMonthClients'),
       ],

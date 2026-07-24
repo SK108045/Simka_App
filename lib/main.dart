@@ -20,7 +20,7 @@ import 'screens/invoices_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/add_client_screen.dart';
 import 'screens/create_invoice_screen.dart';
-import 'screens/create_quotation_screen.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -312,17 +312,7 @@ class _MainShellState extends State<MainShell> {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()));
               },
             ),
-            const SizedBox(height: 12),
-            _QuickActionTile(
-              icon: Icons.request_quote_rounded,
-              color: AppTheme.warningAmber,
-              title: 'Create Quotation',
-              subtitle: 'Generate a quote for fire services',
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateQuotationScreen()));
-              },
-            ),
+
             const SizedBox(height: 16),
           ],
         ),

@@ -5,7 +5,7 @@ import '../models/invoice.dart';
 import '../services/invoice_service.dart';
 import '../theme/app_theme.dart';
 import 'create_invoice_screen.dart';
-import 'quotations_screen.dart';
+
 import '../widgets/background_glow.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/fade_in.dart';
@@ -75,19 +75,13 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_activeSubTab == 1) {
-      return QuotationsScreen(
-        topNavigation: _buildTabSegmentToggle(),
-      );
-    }
-
     return Scaffold(
       backgroundColor: AppTheme.darkBg,
       appBar: AppBar(
         backgroundColor: AppTheme.darkBg,
         elevation: 0,
-        title: _buildTabSegmentToggle(),
-        centerTitle: true,
+        title: const Text('Invoices', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        centerTitle: false,
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.fireRed,
@@ -133,64 +127,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     );
   }
 
-  Widget _buildTabSegmentToggle() {
-    return Container(
-      width: 240,
-      height: 38,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: AppTheme.cardDark,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.borderColor, width: 1),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _activeSubTab = 0),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  color: _activeSubTab == 0 ? AppTheme.fireRed : Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Invoices',
-                  style: TextStyle(
-                    color: _activeSubTab == 0 ? Colors.white : AppTheme.textMuted,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _activeSubTab = 1),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  color: _activeSubTab == 1 ? AppTheme.fireRed : Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Quotations',
-                  style: TextStyle(
-                    color: _activeSubTab == 1 ? Colors.white : AppTheme.textMuted,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildFilterRow() {
     return FadeIn(
