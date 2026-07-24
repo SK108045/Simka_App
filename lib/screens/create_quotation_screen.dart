@@ -44,7 +44,7 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
   DateTime _validUntil = DateTime.now().add(const Duration(days: 30));
 
   // Tax
-  double _taxRate = 0.16;
+  double _taxRate = 0.0;
 
   // Currency
   String _currency = 'Ksh';
@@ -299,7 +299,7 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
                                 ))
                             .toList(),
                         onChanged: (v) =>
-                            setState(() => _taxRate = v ?? 0.16),
+                            setState(() => _taxRate = v ?? 0.0),
                       ),
                     ),
                   ),

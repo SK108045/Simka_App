@@ -79,7 +79,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   final _dateFmt = DateFormat('dd MMM yyyy');
   final _numFmt = NumberFormat('#,##0.00', 'en_US');
 
-  static const double _vatRate = 0.16;
+  static const double _vatRate = 0.0;
 
   double get _subtotal =>
       _lineItems.fold(0, (sum, row) => sum + row.total);
@@ -315,7 +315,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                       value: 'Ksh ${_numFmt.format(_subtotal)}'),
                   const SizedBox(height: 8),
                   _SummaryRow(
-                      label: 'VAT (16%)',
+                      label: 'VAT (0%)',
                       value: 'Ksh ${_numFmt.format(_vat)}'),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
