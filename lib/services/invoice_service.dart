@@ -13,15 +13,33 @@ class InvoiceService extends ChangeNotifier {
     ..sort((a, b) => b.issueDate.compareTo(a.issueDate));
 
   double get totalRevenue => _box.values
-      .where((i) => i.amountPaid > 0)
-      .fold(0, (sum, i) => sum + i.amountPaid);
+      .where((i) => i.status == 'paid')
+      .fold(0, (sum, i) => sum + i.total);
 
   double get totalOutstanding => _box.values
-      .where((i) => i.balance > 0)
-      .fold(0, (sum, i) => sum + i.balance);
+      .where((i) => i.status != 'paid')
+      .fold(0, (sum, i) => sum + i.total);
 
   double get totalInvoiced =>
       _box.values.fold(0, (sum, i) => sum + i.total);
+
+  Map<String, double> getMonthlyRevenue() {
+    final now = DateTime.now();
+    final result = <String, double>{};
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    for (int i = 5; i >= 0; i--) {
+      final target = DateTime(now.year, now.month - i, 1);
+      final label = months[target.month - 1];
+      result[label] = _box.values
+          .where((i) =>
+              i.status == 'paid' &&
+              i.issueDate.year == target.year &&
+              i.issueDate.month == target.month)
+          .fold(0.0, (sum, i) => sum + i.total);
+    }
+    return result;
+  }
 
   Future<void> init() async {
     _box = await Hive.openBox<Invoice>(_boxName);
