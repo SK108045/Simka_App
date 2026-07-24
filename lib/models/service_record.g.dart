@@ -2,6 +2,10 @@
 
 part of 'service_record.dart';
 
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
 class ServiceRecordAdapter extends TypeAdapter<ServiceRecord> {
   @override
   final int typeId = 1;

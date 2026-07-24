@@ -2,6 +2,10 @@
 
 part of 'invoice.dart';
 
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
 class InvoiceAdapter extends TypeAdapter<Invoice> {
   @override
   final int typeId = 3;
@@ -17,16 +21,16 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       invoiceNumber: fields[1] as String,
       clientId: fields[2] as String,
       clientName: fields[3] as String,
-      clientPhone: fields[4] as String? ?? '',
-      clientAddress: fields[5] as String? ?? '',
+      clientPhone: fields[4] as String,
+      clientAddress: fields[5] as String,
       issueDate: fields[6] as DateTime,
       dueDate: fields[7] as DateTime,
-      itemsJson: fields[8] as String? ?? '[]',
-      taxRate: fields[9] as double? ?? 0.16,
-      status: fields[10] as String? ?? 'draft',
-      notes: fields[11] as String? ?? '',
-      currency: fields[12] as String? ?? 'USD',
-      amountPaid: fields[13] as double? ?? 0,
+      itemsJson: fields[8] as String,
+      taxRate: fields[9] as double,
+      status: fields[10] as String,
+      notes: fields[11] as String,
+      currency: fields[12] as String,
+      amountPaid: fields[13] as double,
     );
   }
 

@@ -46,10 +46,10 @@ class InvoiceService extends ChangeNotifier {
     required DateTime issueDate,
     required DateTime dueDate,
     required List<InvoiceItem> items,
-    double taxRate = 0.16,
+    double taxRate = 0.0,
     String status = 'draft',
     String notes = '',
-    String currency = 'USD',
+    String currency = 'Ksh',
   }) async {
     final id = _uuid.v4();
     final invoice = Invoice(

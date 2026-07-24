@@ -5,6 +5,20 @@ import '../models/invoice_item.dart';
 import '../services/quotation_service.dart';
 import '../theme/app_theme.dart';
 
+const List<Map<String, dynamic>> PREDEFINED_SERVICES = [
+  {"code": "STFS/FES/0003", "description": "6 LITRE FOAM FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0006", "description": "9 LITRE WATER FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0007", "description": "CATRIDGE REPLACEMENT", "unit_price": 2000},
+  {"code": "STFS/FES/0008", "description": "CATRIDGE REFILL", "unit_price": 1500},
+  {"code": "STFS/FES/0002", "description": "4KG/6KG/9KG DRY CHEMICAL POWDER FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/001", "description": "2KG/5KG CO2 FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0010", "description": "FIRE BLANKET 4 X 4 SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0011A", "description": "9 KG DRY CHEMICAL POWDER REFILL AND PRESSURIZING", "unit_price": 2500},
+  {"code": "STFS/FES/0005", "description": "9 KG DRY POWDER FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0009", "description": "FIRE ALARM SYSTEM TESTING AND SERVICING", "unit_price": 4500},
+  {"code": "STFS/FES/0004", "description": "CALL POINT BREAK GLASS REPLACEMENT", "unit_price": 600},
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Create Quotation Screen
 // ─────────────────────────────────────────────────────────────────────────────
@@ -33,8 +47,8 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
   double _taxRate = 0.16;
 
   // Currency
-  String _currency = 'USD';
-  static const _currencies = ['USD', 'USD', 'EUR', 'GBP'];
+  String _currency = 'Ksh';
+  static const _currencies = ['Ksh', 'USD', 'EUR', 'GBP'];
 
   // Line Items
   final List<_ItemRow> _items = [];
@@ -57,6 +71,7 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
     return _items
         .map((r) => InvoiceItem(
               description: r.descCtrl.text.trim(),
+              code: r.codeCtrl.text.trim(),
               quantity: double.tryParse(r.qtyCtrl.text) ?? 1,
               unitPrice: double.tryParse(r.priceCtrl.text) ?? 0,
             ))
@@ -253,7 +268,7 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
                                 ))
                             .toList(),
                         onChanged: (v) =>
-                            setState(() => _currency = v ?? 'USD'),
+                            setState(() => _currency = v ?? 'Ksh'),
                       ),
                     ),
                   ),
@@ -557,12 +572,17 @@ class _CreateQuotationScreenState extends State<CreateQuotationScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ItemRow {
+  String serviceType;
   final descCtrl  = TextEditingController();
+  final codeCtrl  = TextEditingController();
   final qtyCtrl   = TextEditingController(text: '1');
   final priceCtrl = TextEditingController();
 
+  _ItemRow() : serviceType = 'Custom';
+
   void dispose() {
     descCtrl.dispose();
+    codeCtrl.dispose();
     qtyCtrl.dispose();
     priceCtrl.dispose();
   }
@@ -621,15 +641,62 @@ class _LineItemCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          // Description
-          TextFormField(
-            controller: row.descCtrl,
-            style:
-                const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
-            decoration: _fieldDecoration('Description'),
-            onChanged: (_) => onChanged(),
+          // Dropdown for predefined service
+          DropdownButtonFormField<String>(
+            value: row.serviceType,
+            isExpanded: true,
+            dropdownColor: AppTheme.surfaceDark,
+            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+            decoration: _fieldDecoration('Service'),
+            items: [
+              ...PREDEFINED_SERVICES.map((s) => DropdownMenuItem(
+                    value: s['description'] as String,
+                    child: Text(s['description'] as String, overflow: TextOverflow.ellipsis),
+                  )),
+              const DropdownMenuItem(value: 'Custom', child: Text('Custom...')),
+            ],
+            onChanged: (val) {
+              if (val == null) return;
+              row.serviceType = val;
+              if (val != 'Custom') {
+                final sel = PREDEFINED_SERVICES.firstWhere((s) => s['description'] == val);
+                row.descCtrl.text = sel['description'] as String;
+                row.codeCtrl.text = sel['code'] as String;
+                row.priceCtrl.text = sel['unit_price'].toString();
+              } else {
+                row.descCtrl.clear();
+                row.codeCtrl.clear();
+                row.priceCtrl.clear();
+              }
+              onChanged();
+            },
           ),
+          if (row.serviceType == 'Custom') ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    controller: row.codeCtrl,
+                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                    decoration: _fieldDecoration('Item Code'),
+                    onChanged: (_) => onChanged(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: TextFormField(
+                    controller: row.descCtrl,
+                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                    decoration: _fieldDecoration('Custom Description'),
+                    onChanged: (_) => onChanged(),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 8),
           // Qty + Unit Price
           Row(

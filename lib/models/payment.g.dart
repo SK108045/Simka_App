@@ -2,6 +2,10 @@
 
 part of 'payment.dart';
 
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
 class PaymentAdapter extends TypeAdapter<Payment> {
   @override
   final int typeId = 2;

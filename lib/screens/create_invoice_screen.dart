@@ -6,6 +6,20 @@ import '../models/invoice_item.dart';
 import '../services/invoice_service.dart';
 import '../theme/app_theme.dart';
 
+const List<Map<String, dynamic>> PREDEFINED_SERVICES = [
+  {"code": "STFS/FES/0003", "description": "6 LITRE FOAM FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0006", "description": "9 LITRE WATER FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0007", "description": "CATRIDGE REPLACEMENT", "unit_price": 2000},
+  {"code": "STFS/FES/0008", "description": "CATRIDGE REFILL", "unit_price": 1500},
+  {"code": "STFS/FES/0002", "description": "4KG/6KG/9KG DRY CHEMICAL POWDER FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/001", "description": "2KG/5KG CO2 FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0010", "description": "FIRE BLANKET 4 X 4 SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0011A", "description": "9 KG DRY CHEMICAL POWDER REFILL AND PRESSURIZING", "unit_price": 2500},
+  {"code": "STFS/FES/0005", "description": "9 KG DRY POWDER FIRE EXTINGUISHER SERVICE", "unit_price": 300},
+  {"code": "STFS/FES/0009", "description": "FIRE ALARM SYSTEM TESTING AND SERVICING", "unit_price": 4500},
+  {"code": "STFS/FES/0004", "description": "CALL POINT BREAK GLASS REPLACEMENT", "unit_price": 600},
+];
+
 class CreateInvoiceScreen extends StatefulWidget {
   const CreateInvoiceScreen({super.key});
 
@@ -15,12 +29,16 @@ class CreateInvoiceScreen extends StatefulWidget {
 
 // Internal editable line item model
 class _LineItemRow {
+  String serviceType;
   final TextEditingController descriptionCtrl;
+  final TextEditingController codeCtrl;
   final TextEditingController qtyCtrl;
   final TextEditingController priceCtrl;
 
   _LineItemRow()
-      : descriptionCtrl = TextEditingController(),
+      : serviceType = 'Custom',
+        descriptionCtrl = TextEditingController(),
+        codeCtrl = TextEditingController(),
         qtyCtrl = TextEditingController(text: '1'),
         priceCtrl = TextEditingController();
 
@@ -30,12 +48,14 @@ class _LineItemRow {
 
   InvoiceItem toItem() => InvoiceItem(
         description: descriptionCtrl.text.trim(),
+        code: codeCtrl.text.trim(),
         quantity: qty,
         unitPrice: price,
       );
 
   void dispose() {
     descriptionCtrl.dispose();
+    codeCtrl.dispose();
     qtyCtrl.dispose();
     priceCtrl.dispose();
   }
@@ -238,61 +258,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 icon: Icons.list_alt_outlined, label: 'Line Items'),
             const SizedBox(height: 12),
 
-            // Column headers
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                children: const [
-                  Expanded(
-                    flex: 4,
-                    child: Text(
-                      'Description',
-                      style: TextStyle(
-                          color: AppTheme.textMuted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  SizedBox(width: 6),
-                  SizedBox(
-                    width: 48,
-                    child: Text(
-                      'Qty',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: AppTheme.textMuted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  SizedBox(width: 6),
-                  SizedBox(
-                    width: 80,
-                    child: Text(
-                      'Unit Price',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: AppTheme.textMuted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  SizedBox(width: 6),
-                  SizedBox(
-                    width: 72,
-                    child: Text(
-                      'Total',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                          color: AppTheme.textMuted,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  SizedBox(width: 32),
-                ],
-              ),
-            ),
+            const SizedBox(height: 12),
 
             ..._lineItems.asMap().entries.map((entry) {
               final index = entry.key;
@@ -346,18 +312,18 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                 children: [
                   _SummaryRow(
                       label: 'Subtotal',
-                      value: 'USD ${_numFmt.format(_subtotal)}'),
+                      value: 'Ksh ${_numFmt.format(_subtotal)}'),
                   const SizedBox(height: 8),
                   _SummaryRow(
                       label: 'VAT (16%)',
-                      value: 'USD ${_numFmt.format(_vat)}'),
+                      value: 'Ksh ${_numFmt.format(_vat)}'),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: Divider(color: AppTheme.borderColor),
                   ),
                   _SummaryRow(
                     label: 'TOTAL',
-                    value: 'USD ${_numFmt.format(_total)}',
+                    value: 'Ksh ${_numFmt.format(_total)}',
                     isTotal: true,
                   ),
                 ],
@@ -454,7 +420,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
 // ─── Line Item Widget ─────────────────────────────────────────────────────────
 
-class _LineItemWidget extends StatelessWidget {
+class _LineItemWidget extends StatefulWidget {
   final _LineItemRow row;
   final VoidCallback onRemove;
   final VoidCallback onChanged;
@@ -469,85 +435,169 @@ class _LineItemWidget extends StatelessWidget {
   });
 
   @override
+  State<_LineItemWidget> createState() => _LineItemWidgetState();
+}
+
+class _LineItemWidgetState extends State<_LineItemWidget> {
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Description
-          Expanded(
-            flex: 4,
-            child: _CompactField(
-              controller: row.descriptionCtrl,
-              hint: 'Item description',
-              onChanged: (_) => onChanged(),
-            ),
-          ),
-          const SizedBox(width: 6),
-          // Qty
-          SizedBox(
-            width: 48,
-            child: _CompactField(
-              controller: row.qtyCtrl,
-              hint: '1',
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              onChanged: (_) => onChanged(),
-            ),
-          ),
-          const SizedBox(width: 6),
-          // Unit Price
-          SizedBox(
-            width: 80,
-            child: _CompactField(
-              controller: row.priceCtrl,
-              hint: '0.00',
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              onChanged: (_) => onChanged(),
-            ),
-          ),
-          const SizedBox(width: 6),
-          // Total (read-only)
-          SizedBox(
-            width: 72,
-            child: Container(
-              height: 44,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceDark,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.borderColor),
-              ),
-              child: Text(
-                numFmt.format(row.total),
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+    return Card(
+      color: AppTheme.surfaceDark,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppTheme.borderColor),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: widget.row.serviceType,
+                    isExpanded: true,
+                    dropdownColor: AppTheme.surfaceDark,
+                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: AppTheme.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: AppTheme.borderColor),
+                      ),
+                    ),
+                    items: [
+                      ...PREDEFINED_SERVICES.map((s) => DropdownMenuItem(
+                            value: s['description'] as String,
+                            child: Text(s['description'] as String, overflow: TextOverflow.ellipsis),
+                          )),
+                      const DropdownMenuItem(value: 'Custom', child: Text('Custom...')),
+                    ],
+                    onChanged: (val) {
+                      if (val == null) return;
+                      setState(() {
+                        widget.row.serviceType = val;
+                        if (val != 'Custom') {
+                          final sel = PREDEFINED_SERVICES.firstWhere((s) => s['description'] == val);
+                          widget.row.descriptionCtrl.text = sel['description'] as String;
+                          widget.row.codeCtrl.text = sel['code'] as String;
+                          widget.row.priceCtrl.text = sel['unit_price'].toString();
+                        } else {
+                          widget.row.descriptionCtrl.clear();
+                          widget.row.codeCtrl.clear();
+                          widget.row.priceCtrl.clear();
+                        }
+                      });
+                      widget.onChanged();
+                    },
+                  ),
                 ),
-              ),
-            ),
-          ),
-          // Remove
-          SizedBox(
-            width: 32,
-            child: GestureDetector(
-              onTap: onRemove,
-              child: Container(
-                height: 44,
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.close,
-                  size: 18,
-                  color: AppTheme.textMuted.withValues(alpha: 0.7),
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppTheme.dangerRed, size: 20),
+                  onPressed: widget.onRemove,
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
+            if (widget.row.serviceType == 'Custom') ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _CompactField(
+                      controller: widget.row.codeCtrl,
+                      hint: 'Item Code',
+                      onChanged: (_) => widget.onChanged(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
+                    child: _CompactField(
+                      controller: widget.row.descriptionCtrl,
+                      hint: 'Custom Description',
+                      onChanged: (_) => widget.onChanged(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Qty', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                      const SizedBox(height: 4),
+                      _CompactField(
+                        controller: widget.row.qtyCtrl,
+                        hint: '1',
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        onChanged: (_) => widget.onChanged(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Unit Price (Ksh)', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                      const SizedBox(height: 4),
+                      _CompactField(
+                        controller: widget.row.priceCtrl,
+                        hint: '0.00',
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        onChanged: (_) => widget.onChanged(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text('Total', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                      const SizedBox(height: 4),
+                      Container(
+                        height: 40,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.darkBg,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.borderColor),
+                        ),
+                        child: Text(
+                          widget.numFmt.format(widget.row.total),
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,10 @@
 
 part of 'quotation.dart';
 
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
 class QuotationAdapter extends TypeAdapter<Quotation> {
   @override
   final int typeId = 4;
@@ -17,15 +21,15 @@ class QuotationAdapter extends TypeAdapter<Quotation> {
       quoteNumber: fields[1] as String,
       clientId: fields[2] as String,
       clientName: fields[3] as String,
-      clientPhone: fields[4] as String? ?? '',
-      clientAddress: fields[5] as String? ?? '',
+      clientPhone: fields[4] as String,
+      clientAddress: fields[5] as String,
       issueDate: fields[6] as DateTime,
       validUntil: fields[7] as DateTime,
-      itemsJson: fields[8] as String? ?? '[]',
-      taxRate: fields[9] as double? ?? 0.16,
-      status: fields[10] as String? ?? 'draft',
-      notes: fields[11] as String? ?? '',
-      currency: fields[12] as String? ?? 'USD',
+      itemsJson: fields[8] as String,
+      taxRate: fields[9] as double,
+      status: fields[10] as String,
+      notes: fields[11] as String,
+      currency: fields[12] as String,
     );
   }
 

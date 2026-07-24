@@ -40,7 +40,7 @@ class QuotationService extends ChangeNotifier {
     double taxRate = 0.16,
     String status = 'draft',
     String notes = '',
-    String currency = 'USD',
+    String currency = 'Ksh',
   }) async {
     final id = _uuid.v4();
     final quotation = Quotation(

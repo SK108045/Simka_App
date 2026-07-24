@@ -198,7 +198,7 @@ class PdfInvoiceService {
       data: invoice.items.map((item) {
         return [
           item.quantity.toStringAsFixed(0),
-          '', // Code is empty in current model
+          item.code,
           item.description,
           'Ksh.${item.unitPrice.toStringAsFixed(2)}',
           'Ksh.0.00', // VAT empty in current model

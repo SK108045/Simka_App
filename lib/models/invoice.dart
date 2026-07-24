@@ -57,10 +57,10 @@ class Invoice extends HiveObject {
     required this.issueDate,
     required this.dueDate,
     this.itemsJson = '[]',
-    this.taxRate = 0.16,
+    this.taxRate = 0.0,
     this.status = 'draft',
     this.notes = '',
-    this.currency = 'USD',
+    this.currency = 'Ksh',
     this.amountPaid = 0,
   });
 

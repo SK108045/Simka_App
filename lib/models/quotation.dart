@@ -54,10 +54,10 @@ class Quotation extends HiveObject {
     required this.issueDate,
     required this.validUntil,
     this.itemsJson = '[]',
-    this.taxRate = 0.16,
+    this.taxRate = 0.0,
     this.status = 'draft',
     this.notes = '',
-    this.currency = 'USD',
+    this.currency = 'Ksh',
   });
 
   List<InvoiceItem> get items => InvoiceItem.listFromJson(itemsJson);
