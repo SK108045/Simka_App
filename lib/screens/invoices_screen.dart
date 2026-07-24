@@ -70,7 +70,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _InvoiceDetailSheet(invoice: invoice),
+      builder: (_) => FractionallySizedBox(
+        heightFactor: 0.9,
+        child: _InvoiceDetailSheet(invoice: invoice),
+      ),
     );
   }
 
@@ -560,35 +563,29 @@ class _InvoiceDetailSheet extends StatelessWidget {
     final statusColor = _statusColor(status);
     final items = invoice.items;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.85,
-      maxChildSize: 0.95,
-      minChildSize: 0.5,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: AppTheme.surfaceDark,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(
-              top: BorderSide(color: AppTheme.borderColor, width: 1),
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceDark,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(
+          top: BorderSide(color: AppTheme.borderColor, width: 1),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 4),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppTheme.borderColor,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          child: Column(
-            children: [
-              // Drag handle
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 4),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppTheme.borderColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -858,8 +855,6 @@ class _InvoiceDetailSheet extends StatelessWidget {
               ),
             ],
           ),
-        );
-      },
     );
   }
 }
