@@ -21,7 +21,6 @@ class ReportsScreen extends StatelessWidget {
     final invoiceSvc = context.watch<InvoiceService>();
     final clientSvc = context.watch<ClientService>();
     final quoteSvc = context.watch<QuotationService>();
-    final recordSvc = context.watch<ServiceRecordService>();
     final paymentSvc = context.watch<PaymentService>();
 
     final currentMonth = DateFormat('MMMM yyyy').format(DateTime.now());
@@ -59,7 +58,7 @@ class ReportsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             FadeIn(delayMs: 100, child: _buildRevenueChart(paymentSvc)),
             const SizedBox(height: 24),
-            FadeIn(delayMs: 200, child: _buildQuickStats(invoiceSvc, quoteSvc, recordSvc)),
+            FadeIn(delayMs: 200, child: _buildQuickStats(invoiceSvc, quoteSvc, clientSvc)),
             const SizedBox(height: 24),
             FadeIn(delayMs: 300, child: _buildRecentInvoices(invoiceSvc)),
             const SizedBox(height: 40),
@@ -215,7 +214,7 @@ class ReportsScreen extends StatelessWidget {
   Widget _buildQuickStats(
     InvoiceService invoiceSvc,
     QuotationService quoteSvc,
-    ServiceRecordService recordSvc,
+    ClientService clientSvc,
   ) {
     final now = DateTime.now();
     final thisMonthInvoices = invoiceSvc.allInvoices
