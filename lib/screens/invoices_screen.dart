@@ -70,10 +70,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => FractionallySizedBox(
-        heightFactor: 0.9,
-        child: _InvoiceDetailSheet(invoice: invoice),
-      ),
+      builder: (_) => _InvoiceDetailSheet(invoice: invoice),
     );
   }
 
@@ -564,6 +561,7 @@ class _InvoiceDetailSheet extends StatelessWidget {
     final items = invoice.items;
 
     return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
         color: AppTheme.surfaceDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1012,7 +1010,7 @@ class _PdfButtonState extends State<_PdfButton> {
       onPressed: _isLoading ? null : _handlePress,
       style: ElevatedButton.styleFrom(
         backgroundColor: widget.color,
-        disabledBackgroundColor: widget.color.withValues(alpha: 0.6),
+        disabledBackgroundColor: widget.color.withOpacity(0.6),
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
