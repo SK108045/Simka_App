@@ -16,8 +16,8 @@ class ClientService extends ChangeNotifier {
   List<Client> get activeClients =>
       clients.where((c) => c.isActive).toList();
 
-  List<Client> get overdueClients =>
-      activeClients.where((c) => c.status == ServiceStatus.overdue).toList();
+  List<Client> get pastClients =>
+      activeClients.where((c) => c.status == ServiceStatus.past).toList();
 
   List<Client> get urgentClients =>
       activeClients.where((c) => c.status == ServiceStatus.urgent).toList();

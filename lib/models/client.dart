@@ -56,9 +56,9 @@ class Client extends HiveObject {
   /// Status based on how soon the service is
   ServiceStatus get status {
     final days = daysUntilService;
-    if (days < 0) return ServiceStatus.overdue;
-    if (days <= 7) return ServiceStatus.urgent;
-    if (days <= 30) return ServiceStatus.upcoming;
+    if (days < 0) return ServiceStatus.past;
+    if (days <= 3) return ServiceStatus.urgent;
+    if (days <= 14) return ServiceStatus.upcoming;
     return ServiceStatus.ok;
   }
 
@@ -89,7 +89,7 @@ class Client extends HiveObject {
   }
 }
 
-enum ServiceStatus { ok, upcoming, urgent, overdue }
+enum ServiceStatus { ok, upcoming, urgent, past }
 
 extension ServiceStatusExt on ServiceStatus {
   String get label {
@@ -100,8 +100,8 @@ extension ServiceStatusExt on ServiceStatus {
         return 'Due Soon';
       case ServiceStatus.urgent:
         return 'Urgent';
-      case ServiceStatus.overdue:
-        return 'Overdue';
+      case ServiceStatus.past:
+        return 'Past';
     }
   }
 }

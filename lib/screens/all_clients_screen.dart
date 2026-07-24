@@ -102,6 +102,11 @@ class _AllClientsScreenState extends State<AllClientsScreen> {
                           child: ClientCard(
                             client: client,
                             onDelete: () => svc.deleteClient(client),
+                            onMarkServiced: () {
+                              int interval = client.nextServiceDate.difference(client.lastServiceDate).inDays;
+                              if (interval <= 0) interval = 180;
+                              svc.markServiced(client, interval);
+                            },
                             onTap: () {
                               Navigator.push(
                                 context,

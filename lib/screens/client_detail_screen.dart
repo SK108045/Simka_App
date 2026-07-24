@@ -16,7 +16,7 @@ class ClientDetailScreen extends StatelessWidget {
 
   Color _statusColor(ServiceStatus s) {
     switch (s) {
-      case ServiceStatus.overdue: return AppTheme.dangerRed;
+      case ServiceStatus.past: return AppTheme.dangerRed;
       case ServiceStatus.urgent: return AppTheme.emberOrange;
       case ServiceStatus.upcoming: return AppTheme.warningAmber;
       case ServiceStatus.ok: return AppTheme.successGreen;
@@ -172,7 +172,7 @@ class ClientDetailScreen extends StatelessWidget {
                         const SizedBox(width: 12),
                         Text(
                           days < 0
-                              ? '${days.abs()} days overdue'
+                              ? '${days.abs()} days past'
                               : days == 0
                                   ? 'Service today!'
                                   : 'In $days days',

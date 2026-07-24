@@ -141,6 +141,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: ClientCard(
                                   client: displayClients[i],
                                   onDelete: () => svc.deleteClient(displayClients[i]),
+                                  onMarkServiced: () {
+                                    int interval = displayClients[i].nextServiceDate.difference(displayClients[i].lastServiceDate).inDays;
+                                    if (interval <= 0) interval = 180;
+                                    svc.markServiced(displayClients[i], interval);
+                                  },
                                   onTap: () => _openClientDetail(displayClients[i]),
                                 ),
                               ),
@@ -283,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStatsArea(ClientService svc) {
     final activeCount = svc.activeClients.length;
-    final overdueCount = svc.overdueClients.length;
+    final pastCount = svc.pastClients.length;
     final urgentCount = svc.urgentClients.length;
     final upcomingCount = svc.upcomingClients.length;
 
@@ -359,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: Row(
               children: [
-                // Overdue Metric
+                // Past Metric
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,15 +372,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         children: [
                           Text(
-                            'OVERDUE',
+                            'PAST',
                             style: TextStyle(
-                              color: overdueCount > 0 ? AppTheme.fireRed : AppTheme.textMuted,
+                              color: pastCount > 0 ? AppTheme.fireRed : AppTheme.textMuted,
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.2,
                             ),
                           ),
-                          if (overdueCount > 0) ...[
+                          if (pastCount > 0) ...[
                             const SizedBox(width: 5),
                             Container(
                               width: 6,
@@ -390,9 +395,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '$overdueCount',
+                        '$pastCount',
                         style: TextStyle(
-                          color: overdueCount > 0 ? AppTheme.fireRed : Colors.white,
+                          color: pastCount > 0 ? AppTheme.fireRed : Colors.white,
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,

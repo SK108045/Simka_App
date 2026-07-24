@@ -19,7 +19,7 @@ class ClientCard extends StatelessWidget {
 
   Color _statusColor(ServiceStatus status) {
     switch (status) {
-      case ServiceStatus.overdue:
+      case ServiceStatus.past:
         return AppTheme.dangerRed;
       case ServiceStatus.urgent:
         return AppTheme.emberOrange;
@@ -32,7 +32,7 @@ class ClientCard extends StatelessWidget {
 
   IconData _statusIcon(ServiceStatus status) {
     switch (status) {
-      case ServiceStatus.overdue:
+      case ServiceStatus.past:
         return Icons.error_rounded;
       case ServiceStatus.urgent:
         return Icons.warning_rounded;
@@ -44,7 +44,7 @@ class ClientCard extends StatelessWidget {
   }
 
   String _daysLabel(int days) {
-    if (days < 0) return '${days.abs()} days overdue';
+    if (days < 0) return '${days.abs()} days past';
     if (days == 0) return 'Today';
     if (days == 1) return 'Tomorrow';
     return 'In $days days';
@@ -213,6 +213,38 @@ class ClientCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (onMarkServiced != null) ...[
+                        const SizedBox(height: 12),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.check_circle_outline, size: 22, color: AppTheme.successGreen),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: AppTheme.surfaceDark,
+                                title: const Text('Mark as Serviced', style: TextStyle(color: AppTheme.textPrimary)),
+                                content: const Text('Has this client been serviced? This will update their next service date.', style: TextStyle(color: AppTheme.textSecondary)),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.successGreen, foregroundColor: Colors.white),
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      onMarkServiced!();
+                                    },
+                                    child: const Text('Confirm'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                       if (onDelete != null) ...[
                         const SizedBox(height: 16),
                         IconButton(
