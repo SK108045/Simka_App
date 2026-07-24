@@ -56,7 +56,7 @@ class ReportsScreen extends StatelessWidget {
           children: [
             FadeIn(delayMs: 0, child: _buildSummaryCards(invoiceSvc, clientSvc, paymentSvc)),
             const SizedBox(height: 24),
-            FadeIn(delayMs: 100, child: _buildRevenueChart(invoiceSvc)),
+            FadeIn(delayMs: 100, child: _buildRevenueChart(invoiceSvc, paymentSvc)),
             const SizedBox(height: 24),
             FadeIn(delayMs: 200, child: _buildQuickStats(invoiceSvc, quoteSvc, clientSvc)),
             const SizedBox(height: 24),
@@ -80,7 +80,7 @@ class ReportsScreen extends StatelessWidget {
       children: [
         _StatCard(
           title: 'Total Revenue',
-          value: 'KSH ${NumberFormat('#,##0').format(invoiceSvc.totalRevenue)}',
+          value: 'KSH ${NumberFormat('#,##0').format(invoiceSvc.totalRevenue + paymentSvc.totalRevenue)}',
           icon: Icons.account_balance_wallet_rounded,
           color: AppTheme.successGreen,
         ),
@@ -106,8 +106,14 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRevenueChart(InvoiceService invoiceSvc) {
-    final revenueData = invoiceSvc.getMonthlyRevenue();
+  Widget _buildRevenueChart(InvoiceService invoiceSvc, PaymentService paymentSvc) {
+    final invData = invoiceSvc.getMonthlyRevenue();
+    final payData = paymentSvc.getMonthlyRevenue();
+    
+    final revenueData = <String, double>{};
+    for (final key in invData.keys) {
+      revenueData[key] = (invData[key] ?? 0) + (payData[key] ?? 0);
+    }
     final keys = revenueData.keys.toList();
     final values = revenueData.values.toList();
     final maxVal = values.isEmpty ? 0.0 : values.reduce((a, b) => a > b ? a : b);
