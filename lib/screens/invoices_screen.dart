@@ -63,12 +63,12 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     }
   }
 
-  void _showDetailSheet(BuildContext context, Invoice invoice) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _InvoiceDetailSheet(invoice: invoice),
+  void _showDetailScreen(BuildContext context, Invoice invoice) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InvoiceDetailScreen(invoice: invoice),
+      ),
     );
   }
 
@@ -92,16 +92,18 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           child: _buildFilterRow(),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.fireRed,
         foregroundColor: Colors.white,
+        elevation: 4,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CreateInvoiceScreen()),
           );
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add, size: 20),
+        label: const Text('New Invoice', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: BackgroundGlow(
         child: Consumer<InvoiceService>(
@@ -122,7 +124,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   return _InvoiceCard(
                     invoice: filtered[index],
                     statusColor: _statusColor(filtered[index].paymentStatus),
-                    onTap: () => _showDetailSheet(context, filtered[index]),
+                    onTap: () => _showDetailScreen(context, filtered[index]),
                   );
                 },
               ),
@@ -198,47 +200,38 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
       child: SizedBox(
         height: 52,
         child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        itemCount: _filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final filter = _filters[index];
-          final isSelected = _selectedFilter == filter;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedFilter = filter),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppTheme.fireRed
-                    : AppTheme.cardDark,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? AppTheme.fireRed
-                      : AppTheme.borderColor,
-                  width: 1,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          itemCount: _filters.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final filter = _filters[index];
+            final isSelected = _selectedFilter == filter;
+            return GestureDetector(
+              onTap: () => setState(() => _selectedFilter = filter),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppTheme.fireRed : AppTheme.cardDark,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? AppTheme.fireRed : AppTheme.borderColor,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  filter,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : AppTheme.textSecondary,
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ),
-              child: Text(
-                filter,
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : AppTheme.textSecondary,
-                  fontSize: 13,
-                  fontWeight: isSelected
-                      ? FontWeight.w600
-                      : FontWeight.normal,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -251,7 +244,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           Icon(
             Icons.local_fire_department_rounded,
             size: 64,
-            color: AppTheme.fireRed.withValues(alpha: 0.4),
+            color: AppTheme.fireRed.withOpacity(0.4),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -303,100 +296,92 @@ class _InvoiceCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top row: invoice number + status badge
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      invoice.invoiceNumber,
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-                  _StatusBadge(
-                      label: status.label, color: statusColor),
-                ],
-              ),
-              const SizedBox(height: 10),
-              // Client name
-              Text(
-                invoice.clientName,
-                style: const TextStyle(
-                  color: AppTheme.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 6),
-              // Due date
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today_outlined,
-                      size: 13, color: AppTheme.textMuted),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Due: ${dateFormatter.format(invoice.dueDate)}',
-                    style: const TextStyle(
-                        color: AppTheme.textMuted, fontSize: 12),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Divider(color: AppTheme.borderColor, height: 1),
-              const SizedBox(height: 10),
-              // Amount row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Total',
-                        style: TextStyle(
-                            color: AppTheme.textMuted, fontSize: 11),
-                      ),
-                      Text(
-                        'KES ${formatter.format(invoice.total)}',
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        invoice.invoiceNumber,
                         style: const TextStyle(
                           color: AppTheme.textPrimary,
-                          fontSize: 17,
+                          fontSize: 15,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
                         ),
                       ),
-                    ],
+                    ),
+                    _StatusBadge(label: status.label, color: statusColor),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  invoice.clientName,
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
-                  if (invoice.balance > 0 &&
-                      status != InvoiceStatus.draft)
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today_outlined, size: 13, color: AppTheme.textMuted),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Due: ${dateFormatter.format(invoice.dueDate)}',
+                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Divider(color: AppTheme.borderColor, height: 1),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Balance',
-                          style: TextStyle(
-                              color: AppTheme.textMuted, fontSize: 11),
+                          'Total',
+                          style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          'KES ${formatter.format(invoice.balance)}',
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                          'KES ${formatter.format(invoice.total)}',
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ],
                     ),
-                ],
-              ),
-            ],
+                    if (invoice.balance > 0 && status != InvoiceStatus.draft)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'Balance',
+                            style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'KES ${formatter.format(invoice.balance)}',
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -416,16 +401,16 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
+        border: Border.all(color: color.withOpacity(0.4), width: 1),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: color,
           fontSize: 11,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w800,
           letterSpacing: 0.3,
         ),
       ),
@@ -433,12 +418,12 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-// ─── Invoice Detail Bottom Sheet ─────────────────────────────────────────────
+// ─── Invoice Detail Screen ───────────────────────────────────────────────────
 
-class _InvoiceDetailSheet extends StatelessWidget {
+class InvoiceDetailScreen extends StatelessWidget {
   final Invoice invoice;
 
-  const _InvoiceDetailSheet({required this.invoice});
+  const InvoiceDetailScreen({super.key, required this.invoice});
 
   Color _statusColor(InvoiceStatus status) {
     switch (status) {
@@ -458,7 +443,7 @@ class _InvoiceDetailSheet extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.cardDark,
+        backgroundColor: AppTheme.surfaceDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppTheme.borderColor),
@@ -473,17 +458,26 @@ class _InvoiceDetailSheet extends StatelessWidget {
           children: [
             Text(
               'Balance: KES ${NumberFormat('#,##0', 'en_US').format(invoice.balance)}',
-              style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextField(
               controller: amountCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: AppTheme.textPrimary),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Amount Paid (KES)',
+                labelStyle: const TextStyle(color: AppTheme.textMuted),
                 prefixText: 'KES ',
+                prefixStyle: const TextStyle(color: AppTheme.textPrimary),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.fireRed),
+                ),
               ),
             ),
           ],
@@ -491,21 +485,23 @@ class _InvoiceDetailSheet extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppTheme.textMuted)),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.fireRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () {
               final amount = double.tryParse(amountCtrl.text.trim()) ?? 0;
               if (amount > 0) {
-                context
-                    .read<InvoiceService>()
-                    .recordPayment(invoice.id, amount);
+                context.read<InvoiceService>().recordPayment(invoice.id, amount);
                 Navigator.pop(ctx);
-                Navigator.pop(context); // close bottom sheet
+                Navigator.pop(context); // Go back to list
               }
             },
-            child: const Text('Save'),
+            child: const Text('Save Payment', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -516,34 +512,37 @@ class _InvoiceDetailSheet extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.cardDark,
+        backgroundColor: AppTheme.surfaceDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppTheme.borderColor),
         ),
         title: const Text(
           'Delete Invoice',
-          style: TextStyle(color: AppTheme.textPrimary),
+          style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
         ),
         content: Text(
-          'Are you sure you want to delete ${invoice.invoiceNumber}? This cannot be undone.',
-          style: const TextStyle(color: AppTheme.textSecondary),
+          'Are you sure you want to permanently delete ${invoice.invoiceNumber}?',
+          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 15),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppTheme.textMuted)),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.dangerRed),
+              backgroundColor: AppTheme.dangerRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () {
               context.read<InvoiceService>().deleteInvoice(invoice.id);
               Navigator.pop(ctx);
-              Navigator.pop(context); // close bottom sheet
+              Navigator.pop(context); // Go back to list
             },
-            child: const Text('Delete'),
+            icon: const Icon(Icons.delete_forever, size: 18),
+            label: const Text('Delete', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -558,274 +557,206 @@ class _InvoiceDetailSheet extends StatelessWidget {
     final statusColor = _statusColor(status);
     final items = invoice.items;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: AppTheme.surfaceDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(
-          top: BorderSide(color: AppTheme.borderColor, width: 1),
+    return Scaffold(
+      backgroundColor: AppTheme.darkBg,
+      appBar: AppBar(
+        backgroundColor: AppTheme.darkBg,
+        elevation: 0,
+        title: Text(
+          invoice.invoiceNumber,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-      ),
-      child: Column(
-        children: [
-          // Drag handle
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 4),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppTheme.borderColor,
-              borderRadius: BorderRadius.circular(2),
+        centerTitle: true,
+        actions: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: _StatusBadge(label: status.label, color: statusColor),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          )
+        ],
+      ),
+      body: BackgroundGlow(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Client info card
+              GlassCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header
+                      _SectionLabel('CLIENT DETAILS'),
+                      const SizedBox(height: 12),
+                      _InfoRow(icon: Icons.person_outline, value: invoice.clientName),
+                      if (invoice.clientPhone.isNotEmpty)
+                        _InfoRow(icon: Icons.phone_outlined, value: invoice.clientPhone),
+                      if (invoice.clientAddress.isNotEmpty)
+                        _InfoRow(icon: Icons.location_on_outlined, value: invoice.clientAddress),
+                      const SizedBox(height: 12),
+                      const Divider(color: AppTheme.borderColor),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              invoice.invoiceNumber,
-                              style: const TextStyle(
-                                color: AppTheme.textPrimary,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                              ),
+                            child: _InfoRow(
+                              icon: Icons.calendar_today_outlined,
+                              value: 'Issued\\n${dateFmt.format(invoice.issueDate)}',
                             ),
                           ),
-                          _StatusBadge(
-                              label: status.label, color: statusColor),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Client info
-                      _SectionLabel('CLIENT'),
-                      const SizedBox(height: 8),
-                      _InfoRow(
-                          icon: Icons.person_outline,
-                          value: invoice.clientName),
-                      if (invoice.clientPhone.isNotEmpty)
-                        _InfoRow(
-                            icon: Icons.phone_outlined,
-                            value: invoice.clientPhone),
-                      if (invoice.clientAddress.isNotEmpty)
-                        _InfoRow(
-                            icon: Icons.location_on_outlined,
-                            value: invoice.clientAddress),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          _InfoRow(
-                              icon: Icons.calendar_today_outlined,
-                              value:
-                                  'Issued: ${dateFmt.format(invoice.issueDate)}'),
-                          const SizedBox(width: 16),
-                          _InfoRow(
+                          Expanded(
+                            child: _InfoRow(
                               icon: Icons.event_outlined,
-                              value:
-                                  'Due: ${dateFmt.format(invoice.dueDate)}'),
+                              value: 'Due Date\\n${dateFmt.format(invoice.dueDate)}',
+                            ),
+                          ),
                         ],
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
-                      const SizedBox(height: 20),
-                      const Divider(color: AppTheme.borderColor),
-                      const SizedBox(height: 12),
-
-                      // Line items
+              // Line items card
+              GlassCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       _SectionLabel('LINE ITEMS'),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 16),
                       // Table header
                       Row(
                         children: [
                           const Expanded(
-                            flex: 4,
-                            child: Text(
-                              'Description',
-                              style: TextStyle(
-                                  color: AppTheme.textMuted,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
-                            ),
+                            flex: 3,
+                            child: Text('Description', style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
                           ),
-                          const SizedBox(
-                            width: 40,
-                            child: Text(
-                              'Qty',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: AppTheme.textMuted,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 80,
-                            child: Text(
-                              'Unit Price',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                  color: AppTheme.textMuted,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 80,
-                            child: Text(
-                              'Total',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                  color: AppTheme.textMuted,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
+                          const SizedBox(width: 40, child: Text('Qty', textAlign: TextAlign.center, style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w600))),
+                          const SizedBox(width: 80, child: Text('Price', textAlign: TextAlign.right, style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w600))),
+                          const SizedBox(width: 80, child: Text('Total', textAlign: TextAlign.right, style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontWeight: FontWeight.w600))),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       const Divider(color: AppTheme.borderColor, height: 1),
+                      const SizedBox(height: 10),
                       ...items.map(
                         (item) => Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Row(
                             children: [
                               Expanded(
-                                flex: 4,
-                                child: Text(
-                                  item.description,
-                                  style: const TextStyle(
-                                      color: AppTheme.textPrimary,
-                                      fontSize: 13),
-                                ),
+                                flex: 3,
+                                child: Text(item.description, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
                               ),
                               SizedBox(
                                 width: 40,
-                                child: Text(
-                                  item.quantity
-                                      .toStringAsFixed(
-                                          item.quantity % 1 == 0 ? 0 : 1),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      color: AppTheme.textSecondary,
-                                      fontSize: 13),
-                                ),
+                                child: Text(item.quantity.toStringAsFixed(item.quantity % 1 == 0 ? 0 : 1), textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                               ),
                               SizedBox(
                                 width: 80,
-                                child: Text(
-                                  numFmt.format(item.unitPrice),
-                                  textAlign: TextAlign.right,
-                                  style: const TextStyle(
-                                      color: AppTheme.textSecondary,
-                                      fontSize: 13),
-                                ),
+                                child: Text(numFmt.format(item.unitPrice), textAlign: TextAlign.right, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                               ),
                               SizedBox(
                                 width: 80,
-                                child: Text(
-                                  numFmt.format(item.total),
-                                  textAlign: TextAlign.right,
-                                  style: const TextStyle(
-                                      color: AppTheme.textPrimary,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600),
-                                ),
+                                child: Text(numFmt.format(item.total), textAlign: TextAlign.right, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      const Divider(color: AppTheme.borderColor, height: 1),
-
                       const SizedBox(height: 16),
+                      const Divider(color: AppTheme.borderColor, height: 1),
+                      const SizedBox(height: 16),
+
                       // Totals
-                      _TotalRow(
-                          label: 'Subtotal',
-                          value: 'KES ${numFmt.format(invoice.subtotal)}'),
-                      const SizedBox(height: 6),
-                      _TotalRow(
-                          label: 'VAT (${(invoice.taxRate * 100).toStringAsFixed(0)}%)',
-                          value: 'KES ${numFmt.format(invoice.taxAmount)}'),
+                      _TotalRow(label: 'Subtotal', value: 'KES ${numFmt.format(invoice.subtotal)}'),
                       const SizedBox(height: 8),
+                      _TotalRow(label: 'VAT (${(invoice.taxRate * 100).toStringAsFixed(0)}%)', value: 'KES ${numFmt.format(invoice.taxAmount)}'),
+                      const SizedBox(height: 12),
                       const Divider(color: AppTheme.borderColor),
-                      _TotalRow(
-                        label: 'TOTAL',
-                        value: 'KES ${numFmt.format(invoice.total)}',
-                        isTotal: true,
-                      ),
+                      const SizedBox(height: 12),
+                      _TotalRow(label: 'TOTAL', value: 'KES ${numFmt.format(invoice.total)}', isTotal: true),
+                      
                       if (invoice.amountPaid > 0) ...[
-                        const SizedBox(height: 6),
-                        _TotalRow(
-                          label: 'Amount Paid',
-                          value: 'KES ${numFmt.format(invoice.amountPaid)}',
-                          valueColor: AppTheme.successGreen,
-                        ),
+                        const SizedBox(height: 12),
+                        _TotalRow(label: 'Amount Paid', value: 'KES ${numFmt.format(invoice.amountPaid)}', valueColor: AppTheme.successGreen),
+                        const SizedBox(height: 8),
                         _TotalRow(
                           label: 'Balance Due',
                           value: 'KES ${numFmt.format(invoice.balance)}',
-                          valueColor: invoice.balance > 0
-                              ? AppTheme.dangerRed
-                              : AppTheme.successGreen,
+                          valueColor: invoice.balance > 0 ? AppTheme.dangerRed : AppTheme.successGreen,
                         ),
                       ],
-
-                      if (invoice.notes.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        const Divider(color: AppTheme.borderColor),
-                        const SizedBox(height: 8),
-                        _SectionLabel('NOTES'),
-                        const SizedBox(height: 6),
-                        Text(
-                          invoice.notes,
-                          style: const TextStyle(
-                              color: AppTheme.textSecondary, fontSize: 13),
-                        ),
-                      ],
-
-                      const SizedBox(height: 28),
-
-                      // Action buttons
-                      if (invoice.paymentStatus != InvoiceStatus.paid)
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () =>
-                                _showRecordPaymentDialog(context),
-                            icon: const Icon(Icons.payments_outlined),
-                            label: const Text('Record Payment'),
-                          ),
-                        ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () => _showDeleteDialog(context),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.dangerRed,
-                            side: const BorderSide(
-                                color: AppTheme.dangerRed, width: 1),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          icon: const Icon(Icons.delete_outline,
-                              color: AppTheme.dangerRed),
-                          label: const Text('Delete Invoice'),
-                        ),
-                      ),
                     ],
                   ),
                 ),
               ),
+
+              if (invoice.notes.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                GlassCard(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SectionLabel('NOTES'),
+                        const SizedBox(height: 10),
+                        Text(
+                          invoice.notes,
+                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 32),
+
+              // Action buttons
+              if (invoice.paymentStatus != InvoiceStatus.paid)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.fireRed,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                    ),
+                    onPressed: () => _showRecordPaymentDialog(context),
+                    icon: const Icon(Icons.payments_outlined, size: 22),
+                    label: const Text('Record Payment', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showDeleteDialog(context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.dangerRed,
+                    side: const BorderSide(color: AppTheme.dangerRed, width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  icon: const Icon(Icons.delete_outline, size: 22),
+                  label: const Text('Delete Invoice', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
             ],
           ),
-        );
+        ),
+      ),
+    );
   }
 }
 
@@ -841,7 +772,7 @@ class _SectionLabel extends StatelessWidget {
       text,
       style: const TextStyle(
         color: AppTheme.fireRed,
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.2,
       ),
@@ -857,17 +788,16 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15, color: AppTheme.textMuted),
-          const SizedBox(width: 8),
+          Icon(icon, size: 16, color: AppTheme.textMuted),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                  color: AppTheme.textSecondary, fontSize: 14),
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14, height: 1.4),
             ),
           ),
         ],
@@ -898,19 +828,16 @@ class _TotalRow extends StatelessWidget {
           label,
           style: TextStyle(
             color: isTotal ? AppTheme.textPrimary : AppTheme.textSecondary,
-            fontSize: isTotal ? 15 : 13,
-            fontWeight:
-                isTotal ? FontWeight.w700 : FontWeight.normal,
+            fontSize: isTotal ? 16 : 14,
+            fontWeight: isTotal ? FontWeight.w800 : FontWeight.normal,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            color: valueColor ??
-                (isTotal ? AppTheme.textPrimary : AppTheme.textSecondary),
-            fontSize: isTotal ? 16 : 13,
-            fontWeight:
-                isTotal ? FontWeight.w800 : FontWeight.w500,
+            color: valueColor ?? (isTotal ? AppTheme.textPrimary : AppTheme.textSecondary),
+            fontSize: isTotal ? 18 : 14,
+            fontWeight: isTotal ? FontWeight.w900 : FontWeight.w600,
           ),
         ),
       ],
