@@ -19,7 +19,7 @@ class PdfInvoiceService {
 
     pw.MemoryImage? logoImage;
     try {
-      final ByteData data = await rootBundle.load('assets/icon.png');
+      final ByteData data = await rootBundle.load('assets/images/simka_logo.jpg');
       logoImage = pw.MemoryImage(data.buffer.asUint8List());
     } catch (e) {
       // Ignored if logo isn't found
@@ -77,66 +77,71 @@ class PdfInvoiceService {
           height: 19,
           color: _darkBlue,
         ),
-        pw.SizedBox(height: 12),
+        pw.SizedBox(height: 10),
+        pw.Center(
+          child: pw.Text('Invoice', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 22)),
+        ),
+        pw.SizedBox(height: 14),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Row(
-              children: [
-                if (logoImage != null)
-                  pw.Container(
-                    width: 51,
-                    height: 54,
-                    child: pw.Image(logoImage),
-                  ),
-                pw.SizedBox(width: 10),
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(companyName, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                    pw.SizedBox(height: 2),
-                    pw.Text(companyAddress1, style: const pw.TextStyle(fontSize: 10)),
-                    pw.Text(companyAddress2, style: const pw.TextStyle(fontSize: 10)),
-                    pw.Text(companyPhone, style: const pw.TextStyle(fontSize: 10)),
-                  ],
-                ),
-              ],
-            ),
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                pw.Container(
-                  width: 78,
-                  height: 36,
-                  alignment: pw.Alignment.center,
-                  child: pw.Text('Invoice', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 22)),
-                ),
-              ],
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 8),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Container(width: 270, height: 9, color: _darkBlue),
-            pw.Container(width: 216, height: 9, color: _darkBlue),
-          ],
-        ),
-        pw.SizedBox(height: 12),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Container(width: 270, height: 2, color: _darkBlue),
+            // Left Column
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                _buildMetaRow('Date:', df.format(invoice.issueDate)),
+                pw.Container(width: 270, height: 9, color: _darkBlue),
+                pw.SizedBox(height: 16),
+                if (logoImage != null)
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.only(left: 6),
+                    child: pw.Container(
+                      width: 51,
+                      height: 54,
+                      child: pw.Image(logoImage),
+                    ),
+                  )
+                else
+                  pw.SizedBox(height: 54),
+                pw.SizedBox(height: 20),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(left: 6),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(companyName, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      pw.SizedBox(height: 5),
+                      pw.Text(companyAddress1, style: const pw.TextStyle(fontSize: 10)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(companyAddress2, style: const pw.TextStyle(fontSize: 10)),
+                      pw.SizedBox(height: 2),
+                      pw.Text(companyPhone, style: const pw.TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                ),
                 pw.SizedBox(height: 2),
-                _buildMetaRow('Invoice No.:', invoice.invoiceNumber),
-                pw.SizedBox(height: 2),
-                _buildMetaRow('Due Date:', df.format(invoice.dueDate)),
+                pw.Container(width: 270, height: 2, color: _darkBlue),
+              ],
+            ),
+            // Right Column
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Container(width: 216, height: 9, color: _darkBlue),
+                pw.SizedBox(height: 19),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(left: 6),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      _buildMetaRow('Date:', df.format(invoice.issueDate)),
+                      pw.SizedBox(height: 2),
+                      _buildMetaRow('Invoice No.:', invoice.invoiceNumber),
+                      pw.SizedBox(height: 2),
+                      _buildMetaRow('Due Date:', df.format(invoice.dueDate)),
+                    ],
+                  ),
+                ),
                 pw.SizedBox(height: 5),
                 pw.Container(width: 216, height: 2, color: _darkBlue),
               ],
