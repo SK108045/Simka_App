@@ -81,19 +81,19 @@ class ReportsScreen extends StatelessWidget {
       children: [
         _StatCard(
           title: 'Total Revenue',
-          value: 'USD ${NumberFormat('#,##0').format(paymentSvc.totalRevenue)}',
+          value: 'KSH ${NumberFormat('#,##0').format(paymentSvc.totalRevenue)}',
           icon: Icons.account_balance_wallet_rounded,
           color: AppTheme.successGreen,
         ),
         _StatCard(
           title: 'Total Invoiced',
-          value: 'USD ${NumberFormat('#,##0').format(invoiceSvc.totalInvoiced)}',
+          value: 'KSH ${NumberFormat('#,##0').format(invoiceSvc.totalInvoiced)}',
           icon: Icons.receipt_long_rounded,
           color: AppTheme.emberOrange,
         ),
         _StatCard(
           title: 'Outstanding',
-          value: 'USD ${NumberFormat('#,##0').format(invoiceSvc.totalOutstanding)}',
+          value: 'KSH ${NumberFormat('#,##0').format(invoiceSvc.totalOutstanding)}',
           icon: Icons.warning_rounded,
           color: AppTheme.dangerRed,
         ),
@@ -120,7 +120,7 @@ class ReportsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Monthly Revenue (USD)',
+            'Monthly Revenue (KSH)',
             style: TextStyle(
                 color: AppTheme.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -277,7 +277,7 @@ class ReportsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('USD ${NumberFormat('#,##0').format(inv.total)}',
+                          Text('KSH ${NumberFormat('#,##0').format(inv.total)}',
                               style: const TextStyle(
                                   color: AppTheme.textPrimary,
                                   fontWeight: FontWeight.bold)),
