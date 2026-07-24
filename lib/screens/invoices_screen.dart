@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:printing/printing.dart';
 import '../models/invoice.dart';
 import '../services/invoice_service.dart';
-import '../services/invoice_pdf_service.dart';
 import '../theme/app_theme.dart';
 import 'create_invoice_screen.dart';
 import 'quotations_screen.dart';
@@ -560,30 +558,35 @@ class _InvoiceDetailSheet extends StatelessWidget {
     final statusColor = _statusColor(status);
     final items = invoice.items;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: AppTheme.surfaceDark,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(
-          top: BorderSide(color: AppTheme.borderColor, width: 1),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Drag handle
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 4),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppTheme.borderColor,
-              borderRadius: BorderRadius.circular(2),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      maxChildSize: 0.95,
+      minChildSize: 0.5,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            border: Border(
+              top: BorderSide(color: AppTheme.borderColor, width: 1),
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            children: [
+              // Drag handle
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 4),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -602,32 +605,6 @@ class _InvoiceDetailSheet extends StatelessWidget {
                           ),
                           _StatusBadge(
                               label: status.label, color: statusColor),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── PDF EXPORT (right at top for easy access) ──
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _PdfButton(
-                              icon: Icons.print_rounded,
-                              label: 'Print',
-                              color: const Color(0xFF1F548F),
-                              invoice: invoice,
-                              action: 'print',
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _PdfButton(
-                              icon: Icons.download_rounded,
-                              label: 'Download',
-                              color: AppTheme.emberOrange,
-                              invoice: invoice,
-                              action: 'download',
-                            ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -853,6 +830,8 @@ class _InvoiceDetailSheet extends StatelessWidget {
               ),
             ],
           ),
+        );
+      },
     );
   }
 }
@@ -942,89 +921,6 @@ class _TotalRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PdfButton extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Invoice invoice;
-  final String action; // 'print' or 'download'
-
-  const _PdfButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.invoice,
-    required this.action,
-  });
-
-  @override
-  State<_PdfButton> createState() => _PdfButtonState();
-}
-
-class _PdfButtonState extends State<_PdfButton> {
-  bool _isLoading = false;
-
-  Future<void> _handlePress() async {
-    if (_isLoading) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final pdfBytes = await InvoicePdfService.generateFromInvoice(widget.invoice);
-      
-      if (widget.action == 'print') {
-        await Printing.layoutPdf(
-          onLayout: (_) => pdfBytes,
-          name: 'SIMKA_Invoice_${widget.invoice.invoiceNumber}',
-        );
-      } else {
-        final safeNo = widget.invoice.invoiceNumber.replaceAll(RegExp(r'[^a-zA-Z0-9\-_]'), '');
-        await Printing.sharePdf(
-          bytes: pdfBytes,
-          filename: 'SIMKA_Invoice_$safeNo.pdf',
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to generate PDF: ${e.toString()}'),
-            backgroundColor: AppTheme.dangerRed,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: _isLoading ? null : _handlePress,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: widget.color,
-        disabledBackgroundColor: widget.color.withOpacity(0.6),
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      icon: _isLoading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : Icon(widget.icon, color: Colors.white, size: 20),
-      label: Text(widget.label, style: const TextStyle(color: Colors.white)),
     );
   }
 }
