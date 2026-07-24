@@ -611,6 +611,32 @@ class _InvoiceDetailSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
+                      // ── PDF EXPORT (right at top for easy access) ──
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _PdfButton(
+                              icon: Icons.print_rounded,
+                              label: 'Print',
+                              color: const Color(0xFF1F548F),
+                              invoice: invoice,
+                              action: 'print',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _PdfButton(
+                              icon: Icons.download_rounded,
+                              label: 'Download',
+                              color: AppTheme.emberOrange,
+                              invoice: invoice,
+                              action: 'download',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
                       // Client info
                       _SectionLabel('CLIENT'),
                       const SizedBox(height: 8),
@@ -826,52 +852,6 @@ class _InvoiceDetailSheet extends StatelessWidget {
                           label: const Text('Delete Invoice'),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      const Divider(color: AppTheme.borderColor),
-                      const SizedBox(height: 12),
-                      _SectionLabel('PDF EXPORT'),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                final pdfBytes = await InvoicePdfService.generateFromInvoice(invoice);
-                                await Printing.layoutPdf(onLayout: (_) => pdfBytes);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1F548F),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                              icon: const Icon(Icons.print_rounded, color: Colors.white, size: 20),
-                              label: const Text('Print', style: TextStyle(color: Colors.white)),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                final pdfBytes = await InvoicePdfService.generateFromInvoice(invoice);
-                                final safeNo = invoice.invoiceNumber.replaceAll(RegExp(r'[^a-zA-Z0-9\-_]'), '');
-                                await Printing.sharePdf(
-                                  bytes: pdfBytes,
-                                  filename: 'SIMKA_Invoice_$safeNo.pdf',
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.emberOrange,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                              icon: const Icon(Icons.download_rounded, color: Colors.white, size: 20),
-                              label: const Text('Download', style: TextStyle(color: Colors.white)),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -969,6 +949,89 @@ class _TotalRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PdfButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Invoice invoice;
+  final String action; // 'print' or 'download'
+
+  const _PdfButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.invoice,
+    required this.action,
+  });
+
+  @override
+  State<_PdfButton> createState() => _PdfButtonState();
+}
+
+class _PdfButtonState extends State<_PdfButton> {
+  bool _isLoading = false;
+
+  Future<void> _handlePress() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final pdfBytes = await InvoicePdfService.generateFromInvoice(widget.invoice);
+      
+      if (widget.action == 'print') {
+        await Printing.layoutPdf(
+          onLayout: (_) => pdfBytes,
+          name: 'SIMKA_Invoice_${widget.invoice.invoiceNumber}',
+        );
+      } else {
+        final safeNo = widget.invoice.invoiceNumber.replaceAll(RegExp(r'[^a-zA-Z0-9\-_]'), '');
+        await Printing.sharePdf(
+          bytes: pdfBytes,
+          filename: 'SIMKA_Invoice_$safeNo.pdf',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate PDF: ${e.toString()}'),
+            backgroundColor: AppTheme.dangerRed,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: _isLoading ? null : _handlePress,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: widget.color,
+        disabledBackgroundColor: widget.color.withValues(alpha: 0.6),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      icon: _isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Icon(widget.icon, color: Colors.white, size: 20),
+      label: Text(widget.label, style: const TextStyle(color: Colors.white)),
     );
   }
 }
