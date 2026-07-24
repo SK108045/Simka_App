@@ -108,21 +108,5 @@ class InvoiceService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Returns monthly revenue for last 6 months as Map[monthLabel, amount]
-  Map<String, double> getMonthlyRevenue() {
-    final now = DateTime.now();
-    final result = <String, double>{};
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    for (int i = 5; i >= 0; i--) {
-      final target = DateTime(now.year, now.month - i, 1);
-      final label = months[target.month - 1];
-      result[label] = _box.values
-          .where((inv) =>
-              inv.issueDate.year == target.year &&
-              inv.issueDate.month == target.month)
-          .fold(0, (sum, inv) => sum + inv.amountPaid);
-    }
-    return result;
-  }
 }
