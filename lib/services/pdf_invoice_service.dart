@@ -19,7 +19,7 @@ class PdfInvoiceService {
 
     pw.ImageProvider? logoImage;
     try {
-      logoImage = await imageFromAssetBundle('assets/images/simka_logo.jpg');
+      logoImage = await imageFromAssetBundle('assets/images/simka_logo.png');
     } catch (e) {
       print('Error loading logo for PDF: $e');
     }
