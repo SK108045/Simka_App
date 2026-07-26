@@ -17,11 +17,9 @@ class PdfInvoiceService {
   static Future<Uint8List> generate(Invoice invoice) async {
     final pdf = pw.Document();
 
-    pw.MemoryImage? logoImage;
+    pw.ImageProvider? logoImage;
     try {
-      final ByteData data = await rootBundle.load('assets/images/simka_logo.jpg');
-      final Uint8List bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-      logoImage = pw.MemoryImage(bytes);
+      logoImage = await imageFromAssetBundle('assets/images/simka_logo.jpg');
     } catch (e) {
       print('Error loading logo for PDF: $e');
     }
@@ -67,7 +65,7 @@ class PdfInvoiceService {
     return pdf.save();
   }
 
-  static pw.Widget _buildHeader(Invoice invoice, pw.MemoryImage? logoImage) {
+  static pw.Widget _buildHeader(Invoice invoice, pw.ImageProvider? logoImage) {
     final df = DateFormat('dd MMMM yyyy');
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
