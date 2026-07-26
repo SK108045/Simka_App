@@ -207,6 +207,15 @@ class PdfInvoiceService {
       headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 7),
       headerDecoration: const pw.BoxDecoration(color: _lightBlue),
       cellStyle: const pw.TextStyle(fontSize: 8),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(0.8), // Qty
+        1: const pw.FlexColumnWidth(2.5), // Item Code
+        2: const pw.FlexColumnWidth(4.5), // Description
+        3: const pw.FlexColumnWidth(2.0), // Unit Price
+        4: const pw.FlexColumnWidth(1.5), // VAT
+        5: const pw.FlexColumnWidth(1.2), // TAX %
+        6: const pw.FlexColumnWidth(2.0), // Total
+      },
       cellAlignments: {
         0: pw.Alignment.centerRight,
         1: pw.Alignment.centerLeft,
